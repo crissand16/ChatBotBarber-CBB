@@ -1,0 +1,92 @@
+comando para correr el servidor desde la terminal:
+uvicorn app.main:app --reload
+
+# LISTAR TODOS LOS USUARIOS
+@router.get("")
+http://localhost:8000/api/v1/usuarios
+
+REGISTRO
+@router.post("/registro")
+http://localhost:8000/api/v1/usuarios/registro
+
+LOGIN
+@router.post("/login")
+http://localhost:8000/api/v1/usuarios/login
+
+CONSULTAR USUARIO POR ID
+@router.get("/{id_usuario}")
+http://localhost:8000/api/v1/usuarios/1013125391
+
+LISTAR CLIENTES
+@router.get("/clientes")
+http://localhost:8000/api/v1/usuarios/clientes
+
+LISTAR ESPECIALISTAS
+@router.get("/especialistas")
+http://localhost:8000/api/v1/usuarios/especialistas
+
+LISTAR ADMINISTRADORES
+@router.get("/administradores")
+http://localhost:8000/api/v1/usuarios/administradores
+
+
+@router.get("")
+http://localhost:8000/api/v1/disponibilidad/?fecha_inicio=2026-08-24&fecha_fin=2026-08-31
+
+DISPONIBILIDAD DE UN ESPECIALISTA
+@router.get("/especialista/{id_especialista}")
+http://localhost:8000/api/v1/disponibilidad/especialista/80345678
+
+LISTAR TODOS LOS SERVICIOS
+@router.get("")
+http://localhost:8000/api/v1/servicios
+
+CREAR UN NUEVO SERVICIO
+@router.post("")
+http://localhost:8000/api/v1/servicios
+
+OBTENER SERVICIO POR ID
+@router.get("/{id_servicio}")
+http://localhost:8000/api/v1/servicios/5
+
+
+CREAR UN SERVICIO_DISPONIBILIDAD
+@router.post("")
+http://localhost:8000/api/v1/servicio_disponibilidad
+
+LISTAR TODOS LOS SERVICIO_DISPONIBILIDAD
+@router.get("")
+http://localhost:8000/api/v1/servicio_disponibilidad
+
+
+LISTAR UN SERVICIO_DISPONIBILIDAD POR ID
+@router.get("/{servicio_disponibilidad}")
+http://localhost:8000/api/v1/servicio_disponibilidad/7
+
+CREAR DETALLE
+@router.post("")
+http://localhost:8000/api/v1/detalle
+
+LISTAR LOS DETALLES DISPONIBLES
+@router.get("")
+http://localhost:8000/api/v1/agenda
+
+BUSCAR DETALLE POR ID
+@router.get("/{id_detalle}")
+http://localhost:8000/api/v1/agenda/2
+
+CREAR AGENDA
+@router.post("")
+http://localhost:8000/api/v1/agendas
+
+AGENDAS POR ESPECIALISTA
+@router.get("/especialista/{id_especialista}")
+http://localhost:8000/api/v1/agendas/especialista/80345678
+
+AGENDAS POR CLIENTE
+@router.get("/cliente/{id_cliente}")
+http://localhost:8000/api/v1/agendas/cliente/1018452301
+
+AGENDAS POR FECHA
+@router.get("/fecha/{fecha}")
+http://localhost:8000/api/v1/agenda/fechas/2026-08-25
