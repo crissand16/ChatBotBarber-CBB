@@ -10,3 +10,4 @@ class AgendaCreate(BaseModel):
 
 class AgendaUpdateEstado(BaseModel):
     nuevo_estado: str = Field(..., example="cancelada", description="Estados permitidos: ")
+    

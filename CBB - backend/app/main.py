@@ -2,7 +2,7 @@ from sqlalchemy import text
 from app.config.database import Base, engine
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.models import Usuario, Agenda, Disponibilidad, Servicios, ServicioDisponibilidadCreate, DetalleCreate
+from app.models import Usuario, Agenda, Disponibilidad, Servicios, ServicioDisponibilidad, DetalleCreate, Factura
 
 
 try:
@@ -56,6 +56,10 @@ from app.routes.agenda_routes import (
     router as agenda_routes
 )
 
+from app.routes.factura_routes import (
+    router as factura_routes
+)
+
 # 5. VERSIÓN API
 API_PREFIX = "/api/v1"
 
@@ -84,6 +88,11 @@ app.include_router(
 app.include_router(
     agenda_routes, 
     prefix=API_PREFIX)
+
+app.include_router(
+    factura_routes,
+    prefix=API_PREFIX
+)
 
 # 7. INICIO
 @app.get("/")

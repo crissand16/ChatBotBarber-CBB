@@ -1,304 +1,125 @@
-from sqlalchemy import text
 from sqlalchemy.orm import Session
- 
- 
+from sqlalchemy.exc import IntegrityError
+
+from app.models.usuario import Usuario
+
+
 # =========================================================
 # LISTAR USUARIOS CON ROL CLIENTE
 # =========================================================
- 
-def obtener_clientes(
-    db: Session
-):
- 
-    sql = text("""
-        SELECT
-            id_usuario,
-            nombres_usuario,
-            apellidos_usuario,
-            correo_usuario,
-            fecha_nacimiento_usuario,
-            telefono_usuario,
-            rol_usuario,
-            fecha_registro_usuario
- 
-        FROM usuario
- 
-        WHERE rol_usuario = 'cliente'
- 
-        ORDER BY
-            nombres_usuario,
-            apellidos_usuario
-    """)
- 
-    resultado = db.execute(sql)
- 
-    return [
-        dict(row._mapping)
-        for row in resultado
-    ]
- 
- 
+
+def obtener_clientes(db: Session):
+    return (
+        db.query(Usuario)
+        .filter(Usuario.rol_usuario == "cliente")
+        .order_by(Usuario.nombres_usuario, Usuario.apellidos_usuario)
+        .all()
+    )
+
+
 # =========================================================
 # LISTAR TODOS LOS USUARIOS
 # =========================================================
- 
-def obtener_usuarios(
-    db: Session
-):
- 
-    sql = text("""
-        SELECT
- 
-            u.id_usuario,
-            u.nombres_usuario,
-            u.apellidos_usuario,
-            u.correo_usuario,
-            u.fecha_nacimiento_usuario,
-            u.telefono_usuario,
-            u.rol_usuario,
-            u.fecha_registro_usuario
- 
-        FROM usuario u
- 
-        ORDER BY
-            u.nombres_usuario,
-            u.apellidos_usuario
-    """)
- 
-    resultado = db.execute(sql)
- 
-    return [
-        dict(row._mapping)
-        for row in resultado
-    ]
- 
- 
+
+def obtener_usuarios(db: Session):
+    return (
+        db.query(Usuario)
+        .order_by(Usuario.nombres_usuario, Usuario.apellidos_usuario)
+        .all()
+    )
+
+
 # =========================================================
 # LISTAR ESPECIALISTAS
 # =========================================================
- 
-def obtener_especialistas(
-    db: Session
-):
- 
-    sql = text("""
-        SELECT
- 
-           u.id_usuario,
-           u.nombres_usuario,
-           u.apellidos_usuario,
-           u.correo_usuario,
-           u.fecha_nacimiento_usuario,
-           u.telefono_usuario,
-           u.rol_usuario,
-           u.fecha_registro_usuario
- 
-        FROM usuario u
- 
-        WHERE u.rol_usuario = 'especialista'
- 
-        ORDER BY
-            u.nombres_usuario,
-            u.apellidos_usuario
-    """)
- 
-    resultado = db.execute(sql)
- 
-    return [
-        dict(row._mapping)
-        for row in resultado
-    ]
- 
- 
+
+def obtener_especialistas(db: Session):
+    return (
+        db.query(Usuario)
+        .filter(Usuario.rol_usuario == "especialista")
+        .order_by(Usuario.nombres_usuario, Usuario.apellidos_usuario)
+        .all()
+    )
+
+
 # =========================================================
 # LISTAR ADMINISTRADORES
 # =========================================================
- 
-def obtener_administradores(
-    db: Session
-):
- 
-    sql = text("""
-        SELECT
- 
-            u.id_usuario,
-            u.nombres_usuario,
-            u.apellidos_usuario,
-            u.correo_usuario,
-            u.fecha_nacimiento_usuario,
-            u.telefono_usuario,
-            u.rol_usuario,
-            u.fecha_registro_usuario
- 
-        FROM usuario u
- 
-        WHERE u.rol_usuario = 'admin'
- 
-        ORDER BY
-            u.nombres_usuario,
-            u.apellidos_usuario
-    """)
- 
-    resultado = db.execute(sql)
- 
-    return [
-        dict(row._mapping)
-        for row in resultado
-    ]
- 
- 
+
+def obtener_administradores(db: Session):
+    return (
+        db.query(Usuario)
+        .filter(Usuario.rol_usuario == "admin")
+        .order_by(Usuario.nombres_usuario, Usuario.apellidos_usuario)
+        .all()
+    )
+
+
 # =========================================================
 # OBTENER USUARIO POR ID
 # =========================================================
- 
-def obtener_usuario(
-    db: Session,
-    id_usuario: str
-):
- 
-    sql = text("""
-        SELECT
- 
-            u.id_usuario,
-            u.nombres_usuario,
-            u.apellidos_usuario,
-            u.correo_usuario,
-            u.fecha_nacimiento_usuario,
-            u.telefono_usuario,
-            u.rol_usuario,
-            u.fecha_registro_usuario
- 
-        FROM usuario u
- 
-        WHERE u.id_usuario = :id_usuario
-    """)
- 
-    resultado = db.execute(
-        sql,
-        {
-            "id_usuario": id_usuario
-        }
-    ).first()
- 
-    if not resultado:
-        return None
- 
-    return dict(resultado._mapping)
- 
- 
+
+def obtener_usuario(db: Session, id_usuario: str):
+    return (
+        db.query(Usuario)
+        .filter(Usuario.id_usuario == id_usuario)
+        .first()
+    )
+
+
 # =========================================================
-# REGISTRO 
+# REGISTRO
 # =========================================================
- 
+
 def registrar_usuario(db: Session, datos: dict):
-    sql = text("""
-        INSERT INTO usuario (
-            id_usuario,
-            nombres_usuario,
-            apellidos_usuario,
-            correo_usuario,
-            contrasena_usuario,
-            fecha_nacimiento_usuario,
-            telefono_usuario,
-            rol_usuario
-        ) VALUES (
-            :id_usuario,
-            :nombres_usuario,
-            :apellidos_usuario,
-            :correo_usuario,
-            :contrasena_usuario,
-            :fecha_nacimiento_usuario,
-            :telefono_usuario,
-            :rol_usuario
+    nuevo = Usuario(
+        id_usuario=datos["id_usuario"],
+        nombres_usuario=datos["nombres_usuario"],
+        apellidos_usuario=datos["apellidos_usuario"],
+        tipo_documento_usuario=datos.get("tipo_documento_usuario") or "CC",
+        documento_usuario=datos["documento_usuario"],
+        correo_usuario=datos["correo_usuario"],
+        contrasena_usuario=datos["contrasena_usuario"],
+        fecha_nacimiento_usuario=datos["fecha_nacimiento_usuario"],
+        telefono_usuario=datos["telefono_usuario"],
+        rol_usuario=datos.get("rol_usuario") or "cliente"
+    )
+
+    try:
+        db.add(nuevo)
+        db.commit()
+        db.refresh(nuevo)
+        return nuevo
+    except IntegrityError:
+        db.rollback()
+        raise ValueError(
+            "Ya existe un usuario con ese id_usuario, "
+            "documento_usuario o correo_usuario"
         )
-        RETURNING 
-            id_usuario,
-            nombres_usuario,
-            apellidos_usuario,
-            correo_usuario,
-            fecha_nacimiento_usuario,
-            telefono_usuario,
-            rol_usuario,
-            fecha_registro_usuario
-    """)
- 
-    resultado = db.execute(sql, datos).first()
-    db.commit()
- 
-    if not resultado:
-        return None
- 
-    return dict(resultado._mapping)
- 
+
+
 # =========================================================
 # LOGIN SIMPLE
 # =========================================================
- 
-def login_usuario(
-    db: Session,
-    correo_usuario: str,
-    contrasena_usuario: str
-):
- 
-    sql = text("""
-        SELECT
- 
-            id_usuario,
-            nombres_usuario,
-            apellidos_usuario,
-            correo_usuario,
-            contrasena_usuario,
-            rol_usuario
- 
-        FROM usuario
- 
-        WHERE correo_usuario = :correo_usuario
-    """)
- 
-    resultado = db.execute(
-        sql,
-        {
-            "correo_usuario": correo_usuario
-        }
-    ).first()
- 
-    # -----------------------------------------------------
-    # USUARIO NO EXISTE
-    # -----------------------------------------------------
- 
-    if not resultado:
- 
+
+def login_usuario(db: Session, correo_usuario: str, contrasena_usuario: str):
+    usuario = (
+        db.query(Usuario)
+        .filter(Usuario.correo_usuario == correo_usuario)
+        .first()
+    )
+
+    if not usuario:
         return None
- 
-    # -----------------------------------------------------
-    # VALIDAR CONTRASEÑA
-    # -----------------------------------------------------
- 
-    if resultado.contrasena_usuario != contrasena_usuario:
- 
+
+    if usuario.contrasena_usuario != contrasena_usuario:
         return None
- 
-    # -----------------------------------------------------
-    # LOGIN CORRECTO
-    # -----------------------------------------------------
- 
+
     return {
         "logueado": True,
- 
-        "id_usuario":
-            resultado.id_usuario,
- 
-        "nombres":
-            resultado.nombres_usuario,
- 
-        "apellidos":
-            resultado.apellidos_usuario,
- 
-        "correo":
-            resultado.correo_usuario,
- 
-        "rol":
-            resultado.rol_usuario,
- 
+        "id_usuario": usuario.id_usuario,
+        "nombres": usuario.nombres_usuario,
+        "apellidos": usuario.apellidos_usuario,
+        "correo": usuario.correo_usuario,
+        "rol": usuario.rol_usuario,
     }
- 

@@ -4,9 +4,11 @@ Column,
     String,
     ForeignKey,
     Numeric, 
-    TIMESTAMP
+    TIMESTAMP,
+    CheckConstraint
 )
 
+from sqlalchemy.orm import relationship
 from app.config.database import Base
 
 
@@ -39,3 +41,36 @@ class Agenda(Base):
         TIMESTAMP,
         nullable=False
     )
+
+    __table_args__ = (
+        CheckConstraint(
+            "estado_agenda IN ('pendiente', 'completada', 'cancelada')",
+            name="chk_agenda_estado"
+        ),
+        CheckConstraint("precio_total >= 0", name="chk_agenda_precio_total"),
+    )
+
+    # =========================================================
+    # RELACIONES
+    # =========================================================
+
+    cliente = relationship(
+        "Usuario",
+        back_populates="agendas_cliente",
+        foreign_keys=[id_cliente]
+    )
+
+    detalles = relationship(
+        "Detalle",
+        back_populates="agenda",
+        cascade="all, delete-orphan"
+    )
+
+    factura = relationship(
+        "Factura",
+        back_populates="agenda",
+        uselist=False
+    )
+
+    def __repr__(self):
+        return f"<Agenda id={self.id_agenda} estado={self.estado_agenda}>"
