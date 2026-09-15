@@ -42,8 +42,8 @@ class Detalle(Base):
     # RELACIONES
     # =========================================================
 
-    agenda = relationship("Agenda", back_populates="detalle")
-    servicio_disponibilidad = relationship("ServicioDisponibilidad", back_populates="detalle")
+    agenda = relationship("Agenda", back_populates="detalles")
+    servicio_disponibilidad = relationship("ServicioDisponibilidad", back_populates="detalles")
 
     def __repr__(self):
         return f"<Detalle id={self.id_detalle} agenda={self.id_agenda}>"

@@ -9,8 +9,6 @@ from app.models.usuario import Usuario
 # HELPER: SERIALIZAR UN REGISTRO DE DISPONIBILIDAD
 # =========================================================
 # Mantiene la misma forma de dict que antes devolvía el SQL
-# crudo (con nombres_usuario / apellidos_usuario incluidos),
-# para no romper al frontend que ya consume este endpoint.
 
 def _serializar(disponibilidad: Disponibilidad) -> dict:
     return {
@@ -126,12 +124,12 @@ def actualizar_disponibilidad(db: Session, id_disponibilidad: int, datos: dict):
     )
 
     for campo in campos_actualizables:
-        if datos.get(campo) is not None:
+        if datos.get(campo) is not None: #get  obtiene el valor de una clave  
             setattr(disponibilidad, campo, datos[campo])
 
     try:
         db.commit()
-        db.refresh(disponibilidad)
+        db.refresh(disponibilidad) #Vuelve a leer el objeto desde la base
         return disponibilidad
     except IntegrityError:
         db.rollback()

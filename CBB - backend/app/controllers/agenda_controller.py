@@ -1,354 +1,335 @@
-from sqlalchemy import text
 from datetime import datetime
-from sqlalchemy.orm import Session
+
+from sqlalchemy.orm import Session, joinedload
+
 from app.models.agenda import Agenda
+from app.models.detalle import Detalle
+from app.models.servicio_disponibilidad import ServicioDisponibilidad
+from app.models.disponibilidad import Disponibilidad
+from app.models.usuario import Usuario
 from app.schema.agenda_schema import AgendaCreate
-from app.utils.response import estructurar_agendas
 
-# =====================================================
+
+# =========================================================
+# CARGA EAGER USADA EN LOS LISTADOS DE AGENDAS
+# =========================================================
+# Evita el problema N+1: en una sola tanda de queries trae
+# cliente, detalles -> servicio_disponibilidad -> servicio
+# y detalles -> servicio_disponibilidad -> disponibilidad -> especialista.
+
+_EAGER_AGENDA = (
+    joinedload(Agenda.cliente),
+    joinedload(Agenda.detalles)
+        .joinedload(Detalle.servicio_disponibilidad)
+        .joinedload(ServicioDisponibilidad.servicio),
+    joinedload(Agenda.detalles)
+        .joinedload(Detalle.servicio_disponibilidad)
+        .joinedload(ServicioDisponibilidad.disponibilidad)
+        .joinedload(Disponibilidad.especialista),
+)
+
+
+# =========================================================
+# HELPER: SERIALIZAR UNA AGENDA (con cliente/especialista/servicios)
+# =========================================================
+
+# como son lo datos en ORM y como los va a ver el cliente de la API
+
+def _serializar_agenda(agenda: Agenda) -> dict:
+    servicios = []
+    disponibilidad = None
+
+    for detalle in agenda.detalles:
+        sd = detalle.servicio_disponibilidad
+        if not sd:
+            continue
+
+        if sd.servicio:
+            servicios.append({
+                "id_servicio": sd.servicio.id_servicios,
+                "nombre": sd.servicio.nombre_servicio,
+                "precio": float(sd.servicio.precio_servicio)
+            })
+
+        if disponibilidad is None:
+            disponibilidad = sd.disponibilidad
+
+    especialista = disponibilidad.especialista if disponibilidad else None
+    cliente = agenda.cliente
+
+    return {
+        "id_agenda": agenda.id_agenda,
+        "estado_agenda": agenda.estado_agenda,
+        "precio_total": float(agenda.precio_total) if agenda.precio_total is not None else 0.0,
+        "fecha_creacion_agenda": (
+            agenda.fecha_creacion_agenda.isoformat()
+            if agenda.fecha_creacion_agenda else None
+        ),
+        "fecha_agenda": (
+            str(disponibilidad.fecha_disponibilidad) if disponibilidad else None
+        ),
+        "hora_agenda": (
+            str(disponibilidad.hora_inicio_disponibilidad) if disponibilidad else None
+        ),
+        "cliente": {
+            "id": cliente.id_usuario,
+            "nombre": f"{cliente.nombres_usuario} {cliente.apellidos_usuario}".strip()
+        } if cliente else None,
+        "especialista": {
+            "id": especialista.id_usuario,
+            "nombre": f"{especialista.nombres_usuario} {especialista.apellidos_usuario}".strip()
+        } if especialista else None,
+        "servicios": servicios
+    }
+
+# =========================================================
+# HELPER: LIBERAR LA DISPONIBILIDAD ASOCIADA A UNA AGENDA
+# =========================================================
+# Se usa al cancelar una agenda: recorre sus detalles y marca
+# como "disponible" cada bloque de horario que había quedado
+# "ocupado" al agendar.
+
+def _liberar_disponibilidades(agenda: Agenda):
+    for detalle in agenda.detalles:
+        sd = detalle.servicio_disponibilidad
+        if sd and sd.disponibilidad:
+            sd.disponibilidad.estado_disponibilidad = "disponible"
+
+
+
+# =========================================================
 # CREAR UNA AGENDA
-# =====================================================
+# =========================================================
 
-def crear_agenda( 
-    db: Session,
-    datos: AgendaCreate):
+def crear_agenda(db: Session, datos: AgendaCreate):
     try:
-    # =====================================================
-    # 1. VERIFICAR CLIENTE
-    # =====================================================
+        # =====================================================
+        # 1. VERIFICAR CLIENTE
+        # =====================================================
 
-        usuario = db.execute(
-            text("""
-                SELECT id_usuario
-                FROM usuario
-                WHERE id_usuario = :id_usuario
-            """),
-            { #datos.id_usuario para coincidir con la FK
-                "id_usuario": datos.id_cliente
-            }
-        ).first()
+        usuario = (
+            db.query(Usuario)
+            .filter(Usuario.id_usuario == datos.id_cliente)
+            .first()
+        )
 
         if not usuario:
+            raise ValueError("El usuario no existe")
 
-            raise ValueError(
-                "El usuario no existe"
+        # =====================================================
+        # 2. VERIFICAR DISPONIBILIDAD (con bloqueo de fila)
+        # =====================================================
+
+        servicio_disponibilidad = (
+            db.query(ServicioDisponibilidad)
+            .options(
+                joinedload(ServicioDisponibilidad.disponibilidad),
+                joinedload(ServicioDisponibilidad.servicio)
             )
+            .filter(
+                ServicioDisponibilidad.id_servicio_disponibilidad
+                == datos.id_servicio_disponibilidad
+            )
+            .with_for_update()
+            .first()
+        )
 
-
-        # =====================================================
-        # 2. VERIFICAR DISPONIBILIDAD
-        # =====================================================
-
-    #JOIN con servicio_disponibilidad para verificar desde el id_servicio_disponibilidad
-        disponibilidad = db.execute(
-            text("""
-                SELECT
-                    d.id_disponibilidad,
-                    d.estado_disponibilidad,
-                    s.precio_servicio
-                FROM servicio_disponibilidad sd
-
-                INNER JOIN disponibilidad d 
-                ON sd.id_disponibilidad =
-                    d.id_disponibilidad
-                
-                INNER JOIN servicios s 
-                ON sd.id_servicios = s.id_servicios
-
-                WHERE sd.id_servicio_disponibilidad =
-                    :id_sd
-                FOR UPDATE
-            """),
-            {
-                "id_sd":
-                    datos.id_servicio_disponibilidad
-            }
-        ).first()
-
-        if not disponibilidad:
-
+        if not servicio_disponibilidad:
             raise ValueError(
                 "No se encontró el servicio o disponibilidad especificada"
             )
 
+        disponibilidad = servicio_disponibilidad.disponibilidad
+        servicio = servicio_disponibilidad.servicio
 
-        if disponibilidad.estado_disponibilidad != "disponible":
-
+        if not disponibilidad or not servicio:
             raise ValueError(
-                "El horario seleccionada ya no está disponible"
+                "No se encontró el servicio o disponibilidad especificada"
             )
 
+        if disponibilidad.estado_disponibilidad != "disponible":
+            raise ValueError("El horario seleccionado ya no está disponible")
 
         # =========================================================
         # 3. CREAR AGENDA CON EL PRECIO CALCULADO AUTOMÁTICAMENTE
         # =========================================================
-        
-        # Se crea el objeto ORM con valores del schema
+
         estado_agenda_val = getattr(datos, "estado_agenda", None) or "pendiente"
+
         agenda = Agenda(
             id_cliente=datos.id_cliente,
-            precio_total=float(disponibilidad.precio_servicio),
-            estado_agenda=estado_agenda_val if getattr(datos, "estado_agenda", None) else "pendiente",
-            #getattr se usa para asegurar que si el esquema enviado no incluye estado_agenda
-            #el backend no colapse y le asigne el valor 'pendiente' por defecto
+            precio_total=float(servicio.precio_servicio),
+            estado_agenda=estado_agenda_val,
             fecha_creacion_agenda=datetime.now()
         )
 
-        # Guarda en la base de datos
         db.add(agenda)
-        db.flush() #Genera el id_agenda sin guardarlo en la bd
-        # definitivamente y sin todavía hacer el commit
+        db.flush()  # genera agenda.id_agenda sin hacer commit todavía
 
-    # =====================================================
-    # 4. REGISTRAR EL DETALLE DE LA AGENDA
-    # =====================================================
-        sql_detalle = text("""
-                    INSERT INTO detalle (id_agenda, id_servicio_disponibilidad)
-                    VALUES (:id_agenda, :id_servicio_disponibilidad)
-                """)
-        db.execute(sql_detalle, {
-            "id_agenda": agenda.id_agenda,
-            "id_servicio_disponibilidad": datos.id_servicio_disponibilidad
-        })
+        # =====================================================
+        # 4. REGISTRAR EL DETALLE DE LA AGENDA
+        # =====================================================
 
-    # =====================================================
-    # 5. ACTUALIZAR DISPONIBILIDAD A 'OCUPADO'
-    # =====================================================
-        sql_update_disp = text("""
-            UPDATE disponibilidad
-            SET estado_disponibilidad = 'ocupado'
-            WHERE id_disponibilidad = :id_disponibilidad
-        """)
-        db.execute(sql_update_disp, {"id_disponibilidad": disponibilidad.id_disponibilidad})
-        db.commit() #Se guarda la agenda, el detalle y la actualización del estado_disponibilidad
+        detalle = Detalle(
+            id_agenda=agenda.id_agenda,
+            id_servicio_disponibilidad=datos.id_servicio_disponibilidad
+        )
+        db.add(detalle)
+
+        # =====================================================
+        # 5. ACTUALIZAR DISPONIBILIDAD A 'OCUPADO'
+        # =====================================================
+
+        disponibilidad.estado_disponibilidad = "ocupado"
+
+        db.commit()
         db.refresh(agenda)
         return agenda
-    
+
     except Exception as e:
         db.rollback()
         raise e
-
 
 
 # =========================================================
 # LISTAR CITAS POR ESPECIALISTA
 # =========================================================
 
-def obtener_citas_especialista(
-    db: Session,
-    id_especialista: str
-):
-
-    sql = text("""
-        SELECT
-            -- =============================================
-            -- AGENDA
-            -- =============================================
-
-            a.id_agenda,
-            a.id_cliente,
-            a.estado_agenda,
-            a.precio_total,
-            a.fecha_creacion_agenda,
-
-            -- =============================================
-            -- CLIENTE
-            -- =============================================
-
-            cli.id_usuario AS id_cliente,
-            cli.nombres_usuario AS nombres_cliente,
-            cli.apellidos_usuario AS apellidos_cliente,
-
-            -- =============================================
-            -- DISPONIBILIDAD Y ESPECIALISTA
-            -- =============================================
-
-            disp.id_disponibilidad,
-            disp.fecha_disponibilidad,
-            disp.hora_inicio_disponibilidad,
-            esp.id_usuario AS id_especialista,
-            esp.nombres_usuario AS nombres_especialista,
-            esp.apellidos_usuario AS apellidos_especialista,
-
-            -- =============================================
-            -- SERVICIO
-            -- =============================================
-            
-            s.id_servicios,
-            s.nombre_servicio,
-            s.precio_servicio
-
-        FROM agenda a
-
-        INNER JOIN detalle det
-            ON a.id_agenda =
-               det.id_agenda
-
-        INNER JOIN servicio_disponibilidad sd
-            ON det.id_servicio_disponibilidad =
-               sd.id_servicio_disponibilidad
-
-        INNER JOIN servicios s
-            ON sd.id_servicios =
-               s.id_servicios
-
-        INNER JOIN disponibilidad disp
-            ON sd.id_disponibilidad =
-               disp.id_disponibilidad
-
-        INNER JOIN usuario esp 
-            ON disp.id_especialista = 
-            esp.id_usuario
-        
-        INNER JOIN usuario cli
-            ON a.id_cliente =
-               cli.id_usuario
-        WHERE disp.id_especialista = :id_especialista
-
-        ORDER BY
-            disp.fecha_disponibilidad DESC,
-            disp.hora_inicio_disponibilidad DESC
-    """)
-
-    resultado = db.execute(
-        sql,
-        {
-            "id_especialista": id_especialista
-        }
+def obtener_citas_especialista(db: Session, id_especialista: str):
+    agendas = (
+        db.query(Agenda)
+        .join(Detalle, Detalle.id_agenda == Agenda.id_agenda)
+        .join(
+            ServicioDisponibilidad,
+            ServicioDisponibilidad.id_servicio_disponibilidad
+            == Detalle.id_servicio_disponibilidad
+        )
+        .join(
+            Disponibilidad,
+            Disponibilidad.id_disponibilidad == ServicioDisponibilidad.id_disponibilidad
+        )
+        .filter(Disponibilidad.id_especialista == id_especialista)
+        .options(*_EAGER_AGENDA)
+        .order_by(
+            Disponibilidad.fecha_disponibilidad.desc(),
+            Disponibilidad.hora_inicio_disponibilidad.desc()
+        )
+        .distinct()
+        .all() # valores únicos
     )
-    return estructurar_agendas(resultado)
+
+    return [_serializar_agenda(a) for a in agendas]
+
 
 # =========================================================
 # LISTAR AGENDAS POR CLIENTE
 # =========================================================
-def obtener_agendas_por_cliente(
-    db: Session,
-    id_cliente: str
-):
-    sql = text("""
-        SELECT
-            -- AGENDA
-            a.id_agenda,
-            a.id_cliente,
-            a.estado_agenda,
-            a.precio_total,
-            a.fecha_creacion_agenda,
 
-            -- CLIENTE
-            cli.nombres_usuario AS nombres_cliente,
-            cli.apellidos_usuario AS apellidos_cliente,
+def obtener_agendas_por_cliente(db: Session, id_cliente: str):
+    agendas = (
+        db.query(Agenda)
+        .filter(Agenda.id_cliente == id_cliente)
+        .options(*_EAGER_AGENDA)
+        .order_by(Agenda.fecha_creacion_agenda.desc())
+        .all()
+    )
 
-            -- DISPONIBILIDAD Y ESPECIALISTA
-            disp.id_disponibilidad,
-            disp.fecha_disponibilidad,
-            disp.hora_inicio_disponibilidad,
-            esp.id_usuario AS id_especialista,
-            esp.nombres_usuario AS nombres_especialista,
-            esp.apellidos_usuario AS apellidos_especialista,
-
-            -- SERVICIO
-            s.id_servicios,
-            s.nombre_servicio,
-            s.precio_servicio
-
-        FROM agenda a
-        INNER JOIN detalle det 
-            ON a.id_agenda = 
-            det.id_agenda
-
-        INNER JOIN servicio_disponibilidad sd 
-            ON det.id_servicio_disponibilidad = 
-            sd.id_servicio_disponibilidad
-
-        INNER JOIN servicios s 
-            ON sd.id_servicios = 
-            s.id_servicios
-
-        INNER JOIN disponibilidad disp 
-            ON sd.id_disponibilidad = 
-            disp.id_disponibilidad
-
-        INNER JOIN usuario esp 
-            ON disp.id_especialista = 
-            esp.id_usuario
-
-        INNER JOIN usuario cli 
-            ON a.id_cliente = 
-            cli.id_usuario
-
-        WHERE a.id_cliente = :id_cliente
-        ORDER BY
-            disp.fecha_disponibilidad DESC,
-            disp.hora_inicio_disponibilidad DESC
-    """)
-
-    resultado = db.execute(sql, {"id_cliente": id_cliente})
-    return estructurar_agendas(resultado)
+    return [_serializar_agenda(a) for a in agendas]
 
 
 # =========================================================
 # LISTAR AGENDAS POR FECHA
 # =========================================================
-def obtener_agendas_por_fecha(
-    db: Session,
-    fecha: str
-):
-    sql = text("""
-        SELECT
-            -- AGENDA
-            a.id_agenda,
-            a.id_cliente,
-            a.estado_agenda,
-            a.precio_total,
-            a.fecha_creacion_agenda,
 
-            -- CLIENTE
-            cli.nombres_usuario AS nombres_cliente,
-            cli.apellidos_usuario AS apellidos_cliente,
+def obtener_agendas_por_fecha(db: Session, fecha: str):
+    agendas = (
+        db.query(Agenda)
+        .join(Detalle, Detalle.id_agenda == Agenda.id_agenda)
+        .join(
+            ServicioDisponibilidad,
+            ServicioDisponibilidad.id_servicio_disponibilidad
+            == Detalle.id_servicio_disponibilidad
+        )
+        .join(
+            Disponibilidad,
+            Disponibilidad.id_disponibilidad == ServicioDisponibilidad.id_disponibilidad
+        )
+        .filter(Disponibilidad.fecha_disponibilidad == fecha)
+        .options(*_EAGER_AGENDA)
+        .order_by(Disponibilidad.hora_inicio_disponibilidad.asc())
+        .distinct()
+        .all()
+    )
 
-            -- DISPONIBILIDAD Y ESPECIALISTA
-            disp.id_disponibilidad,
-            disp.fecha_disponibilidad,
-            disp.hora_inicio_disponibilidad,
-            esp.id_usuario AS id_especialista,
-            esp.nombres_usuario AS nombres_especialista,
-            esp.apellidos_usuario AS apellidos_especialista,
+    return [_serializar_agenda(a) for a in agendas]
 
-            -- SERVICIO
-            s.id_servicios,
-            s.nombre_servicio,
-            s.precio_servicio
 
-        FROM agenda a
-        INNER JOIN detalle det 
-            ON a.id_agenda = 
-            det.id_agenda
+# =========================================================
+# LISTAR TODAS LAS AGENDAS
+# =========================================================
 
-        INNER JOIN servicio_disponibilidad sd 
-            ON det.id_servicio_disponibilidad = 
-            sd.id_servicio_disponibilidad
+def obtener_agendas(db: Session):
+    agendas = (
+        db.query(Agenda)
+        .options(*_EAGER_AGENDA)
+        .order_by(Agenda.fecha_creacion_agenda.desc())
+        .all()
+    )
 
-        INNER JOIN servicios s 
-            ON sd.id_servicios = 
-            s.id_servicios
+    return [_serializar_agenda(a) for a in agendas]
 
-        INNER JOIN disponibilidad disp 
-            ON sd.id_disponibilidad = 
-            disp.id_disponibilidad
 
-        INNER JOIN usuario esp 
-            ON disp.id_especialista = 
-            esp.id_usuario
 
-        INNER JOIN usuario cli 
-            ON a.id_cliente = 
-            cli.id_usuario
+# =========================================================
+# ACTUALIZAR SOLO EL ESTADO DE UNA AGENDA
+# =========================================================
+# Usada por PATCH /agendas/{id_agenda}/estado.
+# Si el nuevo estado es "cancelada", libera la disponibilidad
+# asociada.
 
-        WHERE disp.fecha_disponibilidad = :fecha
-        ORDER BY
-            disp.hora_inicio_disponibilidad ASC,
-            esp.nombres_usuario ASC
-    """)
+def actualizar_estado_agenda(db: Session, id_agenda: int, nuevo_estado: str) -> Agenda:
+    agenda = (
+        db.query(Agenda)
+        .options(*_EAGER_AGENDA)
+        .filter(Agenda.id_agenda == id_agenda)
+        .first()
+    )
 
-    resultado = db.execute(sql, {"fecha": fecha})
-    return estructurar_agendas(resultado)
+    if not agenda:
+        raise ValueError(f"La agenda con ID {id_agenda} no fue encontrada.")
+
+    nuevo_estado = nuevo_estado.lower().strip()
+    agenda.estado_agenda = nuevo_estado
+
+    if nuevo_estado == "cancelada":
+        _liberar_disponibilidades(agenda)
+
+    db.commit()
+    db.refresh(agenda)
+    return agenda
+
+
+
+# =========================================================
+# CANCELAR (anular) UNA AGENDA
+# =========================================================
+# No se hace un DELETE físico de la fila: se marca la agenda
+# como "cancelada" y se libera su disponibilidad asociada,
+# para conservar el historial y no romper la FK de Detalle/Factura.
+
+def cancelar_agenda(db: Session, id_agenda: int) -> bool:
+    agenda = (
+        db.query(Agenda)
+        .options(*_EAGER_AGENDA)
+        .filter(Agenda.id_agenda == id_agenda)
+        .first()
+    )
+
+    if not agenda:
+        return False
+
+    agenda.estado_agenda = "cancelada"
+    _liberar_disponibilidades(agenda)
+
+    db.commit()
+    return True

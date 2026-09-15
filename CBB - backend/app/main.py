@@ -2,7 +2,7 @@ from sqlalchemy import text
 from app.config.database import Base, engine
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.models import Usuario, Agenda, Disponibilidad, Servicios, ServicioDisponibilidad, DetalleCreate, Factura
+from app.models import Usuario, Agenda, Disponibilidad, Servicios, ServicioDisponibilidad, Detalle, Factura
 
 
 try:

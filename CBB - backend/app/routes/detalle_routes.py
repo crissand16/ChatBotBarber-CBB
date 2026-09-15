@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.config.database import get_db
-from app.models.detalle import DetalleCreate
+from app.schema.detalle_schema import DetalleCreate, DetalleOut
 from app.controllers.detalle_controller import (
     crear_detalle,
     obtener_detalle,
@@ -18,16 +18,16 @@ router = APIRouter(
 def registrar(datos: DetalleCreate, db: Session = Depends(get_db)):
     try:
         nuevo = crear_detalle(db, datos.model_dump())
-        if not nuevo:
-            return response_error(
-                mensaje="No se pudo registrar el detalle de la agenda",
-                error="DETALLE_CREATE_FAILED",
-                code=400
-            )
         return response_success(
             mensaje="Detalle registrado exitosamente",
-            data=nuevo,
+            data=DetalleOut.model_validate(nuevo).model_dump(),
             code=201
+        )
+    except ValueError as error:
+        return response_error(
+            mensaje=str(error),
+            error="DETALLE_CREATE_FAILED",
+            code=400
         )
     except Exception as error:
         db.rollback()
@@ -41,9 +41,10 @@ def registrar(datos: DetalleCreate, db: Session = Depends(get_db)):
 def listar_detalles(db: Session = Depends(get_db)):
     try:
         registros = obtener_detalle(db)
+        data = [DetalleOut.model_validate(r).model_dump() for r in registros]
         return response_success(
             mensaje="Lista de detalles obtenida con éxito",
-            data=registros,
+            data=data,
             code=200
         )
     except Exception as error:
@@ -65,7 +66,7 @@ def obtener_por_id(id_detalle: int, db: Session = Depends(get_db)):
             )
         return response_success(
             mensaje="Detalle encontrado",
-            data=detalle,
+            data=DetalleOut.model_validate(detalle).model_dump(),
             code=200
         )
     except Exception as error:

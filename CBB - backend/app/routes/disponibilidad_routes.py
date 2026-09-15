@@ -254,7 +254,7 @@ def registrar_disponibilidad(
 # 4. ACTUALIZAR UN BLOQUE DE DISPONIBILIDAD
 # =========================================================
 
-@router.patch("/{id_disponibilidad}")
+@router.put("/{id_disponibilidad}")
 def modificar_disponibilidad(
     id_disponibilidad: int,
     datos: DisponibilidadUpdate,

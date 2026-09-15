@@ -1,7 +1,11 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.config.database import get_db
-from app.models.servicio_disponibilidad import ServicioDisponibilidadCreate
+from app.schema.servi_dispo_schema import (
+    ServicioDisponibilidadCreate,
+    ServicioDisponibilidadOut
+)
+
 from app.controllers.servi_dispo_controller import (
     crear_servicio_disponibilidad,
     obtener_servicio_disponibilidad,
@@ -19,16 +23,17 @@ def registrar(datos: ServicioDisponibilidadCreate, db: Session = Depends(get_db)
     try:
         nuevo = crear_servicio_disponibilidad(db, datos.model_dump())
         if not nuevo:
+            return response_success(
+                mensaje="Servicio y disponibilidad asociados exitosamente",
+                data=nuevo,
+                code=201
+            )
+    except ValueError as error: 
             return response_error(
                 mensaje="No se pudo asociar el servicio con la disponibilidad",
                 error="ASOCIACION_FAILED",
                 code=400
             )
-        return response_success(
-            mensaje="Servicio y disponibilidad asociados exitosamente",
-            data=nuevo,
-            code=201
-        )
     except Exception as error:
         db.rollback()
         return response_error(
@@ -41,9 +46,10 @@ def registrar(datos: ServicioDisponibilidadCreate, db: Session = Depends(get_db)
 def listar_todos(db: Session = Depends(get_db)):
     try:
         registros = obtener_servicio_disponibilidad(db)
+        data = [ServicioDisponibilidadOut.module_validate(r).model_dump() for r in registros]
         return response_success(
             mensaje="Lista de servicio_disponibilidad obtenida con éxito",
-            data=registros,
+            data=data,
             code=200
         )
     except Exception as error:
@@ -65,7 +71,7 @@ def obtener_por_id(servicio_disponibilidad: int, db: Session = Depends(get_db)):
             )
         return response_success(
             mensaje="Registro encontrado",
-            data=registro,
+            data=ServicioDisponibilidadOut.model_validate(registro).model_dump,
             code=200
         )
     except Exception as error:

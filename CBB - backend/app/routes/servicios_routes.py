@@ -5,7 +5,9 @@ from app.schema.servicios_schema import ServicioCreate, ServicioUpdate, Servicio
 from app.controllers.servicios_controller import (
     listar_servicios,
     obtener_servicio_por_id,
-    crear_servicio
+    crear_servicio,
+    actualizar_servicio,
+    eliminar_servicio
 )
 from app.utils.response import response_success, response_error
 
@@ -85,6 +87,68 @@ def registrar_servicio(datos: ServicioCreate, db: Session = Depends(get_db)):
         db.rollback()
         return response_error(
             mensaje="Error al registrar el servicio",
+            error=str(error),
+            code=500
+        )
+
+# =========================================================
+# ACTUALIZAR UN SERVICIO (parcial)
+# =========================================================
+@router.put("/{id_servicio}")
+def editar_servicio(id_servicio: int, datos: ServicioUpdate, db: Session = Depends(get_db)):
+    try:
+        actualizado = actualizar_servicio(db, id_servicio, datos.model_dump(exclude_unset=True))
+
+        if not actualizado:
+            return response_error(
+                mensaje="Servicio no encontrado",
+                error="SERVICIO_NOT_FOUND",
+                code=404
+            )
+
+        return response_success(
+            mensaje="Servicio actualizado exitosamente",
+            data=ServicioOut.model_validate(actualizado).model_dump(),
+            code=200
+        )
+    except Exception as error:
+        db.rollback()
+        return response_error(
+            mensaje="Error al actualizar servicio",
+            error=str(error),
+            code=500
+        )
+
+# =========================================================
+# ELIMINAR UN SERVICIO
+# =========================================================
+@router.delete("/{id_servicio}")
+def borrar_servicio(id_servicio: int, db: Session = Depends(get_db)):
+    try:
+        eliminado = eliminar_servicio(db, id_servicio)
+
+        if eliminado is None:
+            return response_error(
+                mensaje="Servicio no encontrado",
+                error="SERVICIO_NOT_FOUND",
+                code=404
+            )
+
+        return response_success(
+            mensaje="Servicio eliminado exitosamente",
+            code=200
+        )
+    except ValueError as error:
+        db.rollback()
+        return response_error(
+            mensaje=str(error),
+            error="SERVICIO_IN_USE",
+            code=409
+        )
+    except Exception as error:
+        db.rollback()
+        return response_error(
+            mensaje="Error al eliminar servicio",
             error=str(error),
             code=500
         )
