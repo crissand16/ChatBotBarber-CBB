@@ -1,6 +1,10 @@
 comando para correr el servidor desde la terminal:
 uvicorn app.main:app --reload
 
+------------------
+TABLA USUARIOS
+------------------
+
 # LISTAR TODOS LOS USUARIOS
 @router.get("")
 http://localhost:8000/api/v1/usuarios
@@ -30,12 +34,30 @@ LISTAR ADMINISTRADORES
 http://localhost:8000/api/v1/usuarios/administradores
 
 
-@router.get("")
-http://localhost:8000/api/v1/disponibilidad/?fecha_inicio=2026-08-24&fecha_fin=2026-08-31
+--------------------
+TABLA DISPONIBILIDAD
+--------------------
 
 DISPONIBILIDAD DE UN ESPECIALISTA
 @router.get("/especialista/{id_especialista}")
-http://localhost:8000/api/v1/disponibilidad/especialista/80345678
+http://localhost:8000/api/v1/disponibilidad/especialista/{id_especialista}
+
+DISPONIBILIDAD POR RANGO
+@router.get("")
+http://localhost:8000/api/v1/disponibilidad
+
+REGISTRAR DISPONIBILIDAD
+@router.post("")
+http://localhost:8000/api/v1/disponibilidad/{id_disponibilidad}
+
+ACTUALIZAR DISPONIBILIDAD
+@router.put("/{id_disponibilidad}")
+http://localhost:8000/api/v1/disponibilidad/{id_disponibilidad}
+
+
+-----------------------
+TABLA SERVICIOS
+-----------------------
 
 LISTAR TODOS LOS SERVICIOS
 @router.get("")
@@ -47,8 +69,20 @@ http://localhost:8000/api/v1/servicios
 
 OBTENER SERVICIO POR ID
 @router.get("/{id_servicio}")
-http://localhost:8000/api/v1/servicios/5
+http://localhost:8000/api/v1/servicios/{id_servicio}
 
+ACTUALIZAR SERVICIO
+@router.put("/{id_servicio}")
+http://localhost:8000/api/v1/servicios/{id_servicio}
+
+BORRAR SERVICIO
+@router.delete("/{id_servicio}")
+http://localhost:8000/api/v1/servicios/{id_servicio}
+
+
+----------------------
+TABLA SERVICIO_DISPONIBILIDAD
+----------------------
 
 CREAR UN SERVICIO_DISPONIBILIDAD
 @router.post("")
@@ -63,6 +97,11 @@ LISTAR UN SERVICIO_DISPONIBILIDAD POR ID
 @router.get("/{servicio_disponibilidad}")
 http://localhost:8000/api/v1/servicio_disponibilidad/7
 
+
+--------------
+TABLA DETALLE
+---------------
+
 CREAR DETALLE
 @router.post("")
 http://localhost:8000/api/v1/detalle
@@ -75,8 +114,17 @@ BUSCAR DETALLE POR ID
 @router.get("/{id_detalle}")
 http://localhost:8000/api/v1/agenda/2
 
+
+--------------
+TABLA AGENDA
+---------------
+
 CREAR AGENDA
 @router.post("")
+http://localhost:8000/api/v1/agendas
+
+LISTAR TODAS LAS AGENDAS 
+@router.get("")
 http://localhost:8000/api/v1/agendas
 
 AGENDAS POR ESPECIALISTA
@@ -90,3 +138,31 @@ http://localhost:8000/api/v1/agendas/cliente/1018452301
 AGENDAS POR FECHA
 @router.get("/fecha/{fecha}")
 http://localhost:8000/api/v1/agenda/fechas/2026-08-25
+
+CAMBIAR ESTADO DE UNA AGENDA
+@router.patch("/{id_agenda}/estado")
+http://localhost:8000/api/v1/agendas/{id_agenda}/estado
+
+ANULAR(CANCELAR) AGENDA
+@router.delete("/{id_agenda}")
+http://localhost:8000/api/v1/agendas/{id_agenda}
+
+--------------
+TABLA FACTURA
+---------------
+
+CREAR FACTURA
+@router.post("")
+http://localhost:8000/api/v1/facturas
+
+LISTAR FACTURAS
+@roter.get("")
+http://localhost:8000/api/v1/facturas
+
+OBTENER FACTURA POR ID
+@router.get("/agenda/{id_agenda}")
+http://localhost:8000/api/v1/facturas/{id_factura}
+
+CAMBIAR ESTADO FACTURA
+@router.patch("/{id_factura}/estado")
+http://localhost:8000/api/v1/facturas/{id_factura}/estado
