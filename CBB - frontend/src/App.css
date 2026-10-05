@@ -121,6 +121,84 @@
   position: fixed;
   left: 0;
   top: 0;
+  z-index: 40;
+
+  transition: transform 0.25s ease;
+}
+
+/* =========================
+   NAVBAR MÓVIL + BOTÓN HAMBURGUESA
+   (ocultos salvo en pantallas angostas, ver @media max-width: 640px)
+========================= */
+
+.navbar-mobile {
+  display: none;
+  align-items: center;
+  gap: 14px;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+
+  height: 58px;
+  padding: 0 16px;
+
+  background-color: var(--color-black);
+  color: var(--color-white);
+  border-bottom: 1px solid var(--color-black-soft);
+}
+
+.navbar-mobile-titulo {
+  font-size: 18px;
+  color: var(--color-white);
+}
+
+.hamburguesa {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+
+  width: 36px;
+  height: 36px;
+
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.hamburguesa:hover {
+  background-color: var(--color-black-soft);
+}
+
+.hamburguesa span {
+  width: 20px;
+  height: 2px;
+  background-color: var(--color-white);
+  border-radius: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Al abrirse, las 3 barras se convierten en una X */
+.hamburguesa-abierta span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.hamburguesa-abierta span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburguesa-abierta span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* Fondo oscuro detrás del panel deslizante en móvil */
+.sidebar-overlay {
+  display: none;
 }
 
 .sidebar-logo {
@@ -421,7 +499,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-top: 14px;
+}
+
+.cita-card-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .badge {
@@ -1057,7 +1143,8 @@
    RESPONSIVE
 ========================= */
 
-@media (max-width: 860px) {
+/* Tablet: el sidebar se reduce a un riel de iconos, siempre visible */
+@media (min-width: 641px) and (max-width: 860px) {
   .sidebar {
     width: 76px;
   }
@@ -1080,7 +1167,52 @@
     width: calc(100% - 76px);
     padding: 20px;
   }
+}
 
+/* Celular: el sidebar pasa a ser un panel deslizante (drawer) que se
+   abre con el botón hamburguesa de Navbar, con el mismo look del
+   sidebar de escritorio (logo, usuario, menú completo con texto). */
+@media (max-width: 640px) {
+  .navbar-mobile {
+    display: flex;
+  }
+
+  .sidebar {
+    width: 250px;
+    max-width: 82vw;
+    transform: translateX(-100%);
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  .sidebar-abierta {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(10, 10, 10, 0.5);
+    z-index: 35;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .sidebar-overlay-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 20px;
+    padding-top: calc(58px + 20px);
+  }
+}
+
+@media (max-width: 860px) {
   .contacto-form-section {
     grid-template-columns: 1fr;
   }
