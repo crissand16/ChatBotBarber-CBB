@@ -12,3 +12,13 @@ class ServicioUpdate(BaseModel):
     precio_servicio: Optional[float] = None
     duracion_minutos_servicio: Optional[int] = None
     descripcion_servicio: Optional[str] = None
+
+class ServicioOut(BaseModel):
+    id_servicios: int
+    nombre_servicio: str
+    precio_servicio: float
+    duracion_minutos_servicio: int
+    descripcion_servicio: Optional[str] = None
+
+    class Config:
+        from_attributes = True

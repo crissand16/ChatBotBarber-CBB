@@ -28,3 +28,16 @@ export interface AgendaCreate {
   id_servicio_disponibilidad: number;
   estado_agenda?: string;
 }
+
+// Estados permitidos por la restricción chk_agenda_estado (tabla "agenda").
+export type EstadoAgenda =
+  | 'pendiente'
+  | 'aceptada'
+  | 'rechazada'
+  | 'completada'
+  | 'cancelada';
+
+// Body de PATCH /agendas/{id_agenda}/estado (app/schema/agenda_schema.py -> AgendaUpdateEstado)
+export interface AgendaUpdateEstado {
+  nuevo_estado: EstadoAgenda;
+}

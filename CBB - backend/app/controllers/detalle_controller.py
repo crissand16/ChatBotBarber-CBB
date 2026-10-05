@@ -1,44 +1,41 @@
-from sqlalchemy import text
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+
+from app.models.detalle import Detalle
+
+
+# =========================================================
+# CREAR DETALLE DE AGENDA
+# =========================================================
 
 def crear_detalle(db: Session, datos: dict):
-    sql = text("""
-        INSERT INTO detalle (
-            id_agenda,
-            id_servicio_disponibilidad
-        ) VALUES (
-            :id_agenda,
-            :id_servicio_disponibilidad
+    nuevo = Detalle(
+        id_agenda=datos["id_agenda"],
+        id_servicio_disponibilidad=datos["id_servicio_disponibilidad"]
+    )
+    try:
+        db.add(nuevo)
+        db.commit()
+        db.refresh(nuevo)
+        return nuevo
+    except IntegrityError:
+        db.rollback()
+        raise ValueError(
+            "Ya existe un detalle para esa agenda y ese servicio_disponibilidad, "
         )
-        RETURNING 
-            id_detalle,
-            id_agenda,
-            id_servicio_disponibilidad
-    """)
-    resultado = db.execute(sql, datos).first()
-    db.commit()
-    return dict(resultado._mapping) if resultado else None
+
+
+# =========================================================
+# LISTAR TODOS LOS DETALLES
+# =========================================================
 
 def obtener_detalle(db: Session):
-    sql = text("""
-        SELECT 
-            id_detalle,
-            id_agenda,
-            id_servicio_disponibilidad
-        FROM detalle
-        ORDER BY id_detalle ASC 
-    """)
-    resultado = db.execute(sql)
-    return [dict(row._mapping) for row in resultado]
+    return db.query(Detalle).order_by(Detalle.id_detalle.asc()).all()
+
+
+# =========================================================
+# OBTENER UN DETALLE POR ID
+# =========================================================
 
 def obtener_detalle_por_id(db: Session, id_detalle: int):
-    sql = text("""
-        SELECT 
-            id_detalle,
-            id_agenda,
-            id_servicio_disponibilidad
-        FROM detalle
-        WHERE id_detalle = :id_detalle
-    """)
-    resultado = db.execute(sql, {"id_detalle": id_detalle}).first()
-    return dict(resultado._mapping) if resultado else None
+    return db.query(Detalle).filter(Detalle.id_detalle == id_detalle).first()
