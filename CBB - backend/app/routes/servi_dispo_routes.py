@@ -22,18 +22,18 @@ router = APIRouter(
 def registrar(datos: ServicioDisponibilidadCreate, db: Session = Depends(get_db)):
     try:
         nuevo = crear_servicio_disponibilidad(db, datos.model_dump())
-        if not nuevo:
-            return response_success(
-                mensaje="Servicio y disponibilidad asociados exitosamente",
-                data=nuevo,
-                code=201
-            )
-    except ValueError as error: 
-            return response_error(
-                mensaje="No se pudo asociar el servicio con la disponibilidad",
-                error="ASOCIACION_FAILED",
-                code=400
-            )
+        return response_success(
+            mensaje="Servicio y disponibilidad asociados exitosamente",
+            data=ServicioDisponibilidadOut.model_validate(nuevo).model_dump(),
+            code=201
+        )
+    except ValueError as error:
+        db.rollback()
+        return response_error(
+            mensaje=str(error) or "No se pudo asociar el servicio con la disponibilidad",
+            error="ASOCIACION_FAILED",
+            code=400
+        )
     except Exception as error:
         db.rollback()
         return response_error(
@@ -46,7 +46,13 @@ def registrar(datos: ServicioDisponibilidadCreate, db: Session = Depends(get_db)
 def listar_todos(db: Session = Depends(get_db)):
     try:
         registros = obtener_servicio_disponibilidad(db)
-        data = [ServicioDisponibilidadOut.module_validate(r).model_dump() for r in registros]
+        # BUG anterior: "module_validate" no existe en Pydantic (el método se
+        # llama "model_validate"); ese typo hacía que ESTE endpoint fallara
+        # siempre con un error 500. Como "Agendar nueva cita" llama a este
+        # endpoint apenas el cliente elige un servicio (para saber qué
+        # franjas de disponibilidad están habilitadas para ese servicio),
+        # el error se disparaba en el primer paso del flujo de agendamiento.
+        data = [ServicioDisponibilidadOut.model_validate(r).model_dump() for r in registros]
         return response_success(
             mensaje="Lista de servicio_disponibilidad obtenida con éxito",
             data=data,
@@ -71,7 +77,10 @@ def obtener_por_id(servicio_disponibilidad: int, db: Session = Depends(get_db)):
             )
         return response_success(
             mensaje="Registro encontrado",
-            data=ServicioDisponibilidadOut.model_validate(registro).model_dump,
+            # BUG anterior: faltaban los "()" tras model_dump, así que se
+            # devolvía el método en sí (no serializable a JSON) en vez de
+            # los datos.
+            data=ServicioDisponibilidadOut.model_validate(registro).model_dump(),
             code=200
         )
     except Exception as error:

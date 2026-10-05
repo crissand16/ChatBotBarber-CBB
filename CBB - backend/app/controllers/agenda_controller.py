@@ -101,6 +101,7 @@ def _liberar_disponibilidades(agenda: Agenda):
 # CREAR UNA AGENDA
 # =========================================================
 
+
 def crear_agenda(db: Session, datos: AgendaCreate):
     try:
         # =====================================================
