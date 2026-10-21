@@ -1,3 +1,4 @@
+import traceback
 from datetime import date
 from fastapi import (
     APIRouter,
@@ -114,8 +115,15 @@ def registrar_agenda(
 
         db.rollback()
 
+        # Antes el mensaje genérico ("Error al crear la agenda") ocultaba
+        # el detalle real del error, que sí viajaba en el campo "error"
+        # pero el frontend no lo mostraba. Se imprime la traza completa en
+        # la consola del backend (útil mientras desarrollan) y se incluye
+        # el detalle también en "mensaje", que es lo que sí se ve en la UI.
+        traceback.print_exc()
+
         return response_error(
-            mensaje="Error al crear la agenda",
+            mensaje=f"Error al crear la agenda: {error}",
             error=str(error),
             code=500
         )
