@@ -101,7 +101,6 @@ def _liberar_disponibilidades(agenda: Agenda):
 # CREAR UNA AGENDA
 # =========================================================
 
-
 def crear_agenda(db: Session, datos: AgendaCreate):
     try:
         # =====================================================
@@ -121,11 +120,21 @@ def crear_agenda(db: Session, datos: AgendaCreate):
         # 2. VERIFICAR DISPONIBILIDAD (con bloqueo de fila)
         # =====================================================
 
+        # BUG anterior: joinedload() genera un LEFT OUTER JOIN por defecto.
+        # PostgreSQL no permite "SELECT ... FOR UPDATE" cuando la consulta
+        # tiene un outer join (error FeatureNotSupported: "SELECT FOR
+        # UPDATE cannot be applied to the nullable side of an outer
+        # join"). Como id_disponibilidad e id_servicios son NOT NULL en
+        # servicio_disponibilidad, es seguro forzar INNER JOIN con
+        # innerjoin=True: eso resuelve el error y, de paso, hace que el
+        # bloqueo FOR UPDATE también cubra la fila de disponibilidad
+        # (antes esta consulta fallaba siempre, así que el bloqueo nunca
+        # llegaba a aplicarse).
         servicio_disponibilidad = (
             db.query(ServicioDisponibilidad)
             .options(
-                joinedload(ServicioDisponibilidad.disponibilidad),
-                joinedload(ServicioDisponibilidad.servicio)
+                joinedload(ServicioDisponibilidad.disponibilidad, innerjoin=True),
+                joinedload(ServicioDisponibilidad.servicio, innerjoin=True)
             )
             .filter(
                 ServicioDisponibilidad.id_servicio_disponibilidad
