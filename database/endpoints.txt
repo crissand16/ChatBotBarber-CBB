@@ -1,0 +1,168 @@
+comando para correr el servidor desde la terminal:
+uvicorn app.main:app --reload
+
+------------------
+TABLA USUARIOS
+------------------
+
+# LISTAR TODOS LOS USUARIOS
+@router.get("")
+http://localhost:8000/api/v1/usuarios
+
+REGISTRO
+@router.post("/registro")
+http://localhost:8000/api/v1/usuarios/registro
+
+LOGIN
+@router.post("/login")
+http://localhost:8000/api/v1/usuarios/login
+
+CONSULTAR USUARIO POR ID
+@router.get("/{id_usuario}")
+http://localhost:8000/api/v1/usuarios/1013125391
+
+LISTAR CLIENTES
+@router.get("/clientes")
+http://localhost:8000/api/v1/usuarios/clientes
+
+LISTAR ESPECIALISTAS
+@router.get("/especialistas")
+http://localhost:8000/api/v1/usuarios/especialistas
+
+LISTAR ADMINISTRADORES
+@router.get("/administradores")
+http://localhost:8000/api/v1/usuarios/administradores
+
+
+--------------------
+TABLA DISPONIBILIDAD
+--------------------
+
+DISPONIBILIDAD DE UN ESPECIALISTA
+@router.get("/especialista/{id_especialista}")
+http://localhost:8000/api/v1/disponibilidad/especialista/{id_especialista}
+
+DISPONIBILIDAD POR RANGO
+@router.get("")
+http://localhost:8000/api/v1/disponibilidad
+
+REGISTRAR DISPONIBILIDAD
+@router.post("")
+http://localhost:8000/api/v1/disponibilidad/{id_disponibilidad}
+
+ACTUALIZAR DISPONIBILIDAD
+@router.put("/{id_disponibilidad}")
+http://localhost:8000/api/v1/disponibilidad/{id_disponibilidad}
+
+
+-----------------------
+TABLA SERVICIOS
+-----------------------
+
+LISTAR TODOS LOS SERVICIOS
+@router.get("")
+http://localhost:8000/api/v1/servicios
+
+CREAR UN NUEVO SERVICIO
+@router.post("")
+http://localhost:8000/api/v1/servicios
+
+OBTENER SERVICIO POR ID
+@router.get("/{id_servicio}")
+http://localhost:8000/api/v1/servicios/{id_servicio}
+
+ACTUALIZAR SERVICIO
+@router.put("/{id_servicio}")
+http://localhost:8000/api/v1/servicios/{id_servicio}
+
+BORRAR SERVICIO
+@router.delete("/{id_servicio}")
+http://localhost:8000/api/v1/servicios/{id_servicio}
+
+
+----------------------
+TABLA SERVICIO_DISPONIBILIDAD
+----------------------
+
+CREAR UN SERVICIO_DISPONIBILIDAD
+@router.post("")
+http://localhost:8000/api/v1/servicio_disponibilidad
+
+LISTAR TODOS LOS SERVICIO_DISPONIBILIDAD
+@router.get("")
+http://localhost:8000/api/v1/servicio_disponibilidad
+
+
+LISTAR UN SERVICIO_DISPONIBILIDAD POR ID
+@router.get("/{servicio_disponibilidad}")
+http://localhost:8000/api/v1/servicio_disponibilidad/7
+
+
+--------------
+TABLA DETALLE
+---------------
+
+CREAR DETALLE
+@router.post("")
+http://localhost:8000/api/v1/detalle
+
+LISTAR LOS DETALLES DISPONIBLES
+@router.get("")
+http://localhost:8000/api/v1/agenda
+
+BUSCAR DETALLE POR ID
+@router.get("/{id_detalle}")
+http://localhost:8000/api/v1/agenda/2
+
+
+--------------
+TABLA AGENDA
+---------------
+
+CREAR AGENDA
+@router.post("")
+http://localhost:8000/api/v1/agendas
+
+LISTAR TODAS LAS AGENDAS 
+@router.get("")
+http://localhost:8000/api/v1/agendas
+
+AGENDAS POR ESPECIALISTA
+@router.get("/especialista/{id_especialista}")
+http://localhost:8000/api/v1/agendas/especialista/80345678
+
+AGENDAS POR CLIENTE
+@router.get("/cliente/{id_cliente}")
+http://localhost:8000/api/v1/agendas/cliente/1018452301
+
+AGENDAS POR FECHA
+@router.get("/fecha/{fecha}")
+http://localhost:8000/api/v1/agenda/fechas/2026-08-25
+
+CAMBIAR ESTADO DE UNA AGENDA
+@router.patch("/{id_agenda}/estado")
+http://localhost:8000/api/v1/agendas/{id_agenda}/estado
+
+ANULAR(CANCELAR) AGENDA
+@router.delete("/{id_agenda}")
+http://localhost:8000/api/v1/agendas/{id_agenda}
+
+--------------
+TABLA FACTURA
+---------------
+
+CREAR FACTURA
+@router.post("")
+http://localhost:8000/api/v1/facturas
+
+LISTAR FACTURAS
+@roter.get("")
+http://localhost:8000/api/v1/facturas
+
+OBTENER FACTURA POR ID
+@router.get("/agenda/{id_agenda}")
+http://localhost:8000/api/v1/facturas/{id_factura}
+
+CAMBIAR ESTADO FACTURA
+@router.patch("/{id_factura}/estado")
+http://localhost:8000/api/v1/facturas/{id_factura}/estado
