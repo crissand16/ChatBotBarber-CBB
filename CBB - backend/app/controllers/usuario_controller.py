@@ -1,8 +1,10 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from passlib.context import CryptContext
 
 from app.models.usuario import Usuario
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # =========================================================
 # LISTAR USUARIOS CON ROL CLIENTE
@@ -72,6 +74,9 @@ def obtener_usuario(db: Session, id_usuario: str):
 # =========================================================
 
 def registrar_usuario(db: Session, datos: dict):
+    # 1. Obtener la contraseña en texto plano y generar su hash
+    contrasena_plana = datos["contrasena_usuario"]
+    contrasena_hash = pwd_context.hash(contrasena_plana)
     nuevo = Usuario(
         id_usuario=datos["id_usuario"],
         nombres_usuario=datos["nombres_usuario"],
@@ -79,7 +84,7 @@ def registrar_usuario(db: Session, datos: dict):
         tipo_documento_usuario=datos.get("tipo_documento_usuario") or "CC",
         documento_usuario=datos["documento_usuario"],
         correo_usuario=datos["correo_usuario"],
-        contrasena_usuario=datos["contrasena_usuario"],
+        contrasena_usuario=contrasena_hash, #Se almacena el hash y no la contraseña plana
         fecha_nacimiento_usuario=datos["fecha_nacimiento_usuario"],
         telefono_usuario=datos["telefono_usuario"],
         rol_usuario=datos.get("rol_usuario") or "cliente"
@@ -112,7 +117,7 @@ def login_usuario(db: Session, correo_usuario: str, contrasena_usuario: str):
     if not usuario:
         return None
 
-    if usuario.contrasena_usuario != contrasena_usuario:
+    if not pwd_context.verify(contrasena_usuario, usuario.contrasena_usuario):
         return None
 
     return {
