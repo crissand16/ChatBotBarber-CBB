@@ -84,10 +84,7 @@ def registrar_usuario(db: Session, datos: dict):
         id_usuario=datos["id_usuario"],
         nombres_usuario=datos["nombres_usuario"],
         apellidos_usuario=datos["apellidos_usuario"],
-        tipo_documento_usuario=datos.get("tipo_documento_usuario") or "CC",
-        documento_usuario=datos["documento_usuario"],
         correo_usuario=datos["correo_usuario"],
-        contrasena_usuario=datos["contrasena_usuario"],
         contrasena_usuario=contrasena_hash, #Se almacena el hash y no la contraseña plana
         fecha_nacimiento_usuario=datos["fecha_nacimiento_usuario"],
         telefono_usuario=datos["telefono_usuario"],

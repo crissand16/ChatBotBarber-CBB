@@ -12,8 +12,6 @@ CREATE TABLE usuario (
     id_usuario VARCHAR(10) PRIMARY KEY,
     nombres_usuario VARCHAR(40) NOT NULL,
     apellidos_usuario VARCHAR(40) NOT NULL,
-    tipo_documento_usuario VARCHAR(10) NOT NULL DEFAULT 'CC',
-    documento_usuario VARCHAR(10) NOT NULL UNIQUE,
     correo_usuario VARCHAR(60) NOT NULL UNIQUE,
     contrasena_usuario VARCHAR(255) NOT NULL,
     fecha_nacimiento_usuario DATE NOT NULL,
