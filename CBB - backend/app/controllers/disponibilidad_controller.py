@@ -52,6 +52,7 @@ def obtener_disponibilidad_rango(db: Session, fecha_inicio, fecha_fin):
         .join(Usuario, Disponibilidad.id_especialista == Usuario.id_usuario)
         .options(joinedload(Disponibilidad.especialista))
         .filter(Usuario.rol_usuario == "especialista")
+        .filter(Usuario.activo.is_(True))
         .filter(Disponibilidad.fecha_disponibilidad.between(fecha_inicio, fecha_fin))
         .order_by(
             Disponibilidad.fecha_disponibilidad,
@@ -80,6 +81,9 @@ def crear_disponibilidad(db: Session, datos: dict):
 
     if especialista.rol_usuario != "especialista":
         raise ValueError("El usuario indicado no tiene rol de especialista")
+
+    if not especialista.activo:
+        raise ValueError("El especialista está desactivado")
 
     nueva = Disponibilidad(
         id_especialista=datos["id_especialista"],

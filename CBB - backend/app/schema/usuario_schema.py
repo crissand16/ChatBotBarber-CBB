@@ -27,6 +27,18 @@ class UsuarioUpdate(BaseModel):
     telefono_usuario: Optional[str] = None
     rol_usuario: Optional[str] = None
 
+class UsuarioPerfilUpdate(BaseModel):
+    """Campos que un especialista o cliente puede editar de su perfil.
+
+    No incluye rol, id ni contraseña: esos cambios no se permiten desde
+    el perfil.
+    """
+    nombres_usuario: Optional[str]  = None
+    apellidos_usuario: Optional[str] = None
+    correo_usuario: Optional[EmailStr] = None
+    telefono_usuario: Optional[str] = None
+    fecha_nacimiento_usuario: Optional[date] = None
+
 class UsuarioOut(BaseModel):
     id_usuario: str
     nombres_usuario: str

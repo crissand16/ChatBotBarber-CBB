@@ -4,7 +4,7 @@ from app.config.database import get_db
 
 
 from app.schema.usuario_schema import (
-    LoginRequest, UsuarioCreate, UsuarioOut 
+    LoginRequest, UsuarioCreate, UsuarioOut, UsuarioPerfilUpdate 
 )
 from app.controllers.usuario_controller import (
     obtener_clientes,
@@ -13,9 +13,12 @@ from app.controllers.usuario_controller import (
     obtener_administradores,
     obtener_usuario,
     registrar_usuario,
-    login_usuario
+    login_usuario,
+    actualizar_perfil,
+    desactivar_especialista
 )
 
+from app.utils.errores import Conflicto, NoEncontrado
 from app.utils.response import (
     response_success,
     response_error
@@ -243,6 +246,117 @@ def login(datos: LoginRequest, db: Session = Depends(get_db)):
     except Exception as error:
         return response_error(
             mensaje="Error al realizar login",
+            error=str(error),
+            code=500
+        )
+
+
+# =========================================================
+# TRADUCTOR DE ERRORES DE NEGOCIO A HTTP
+# =========================================================
+
+def _error_negocio(error: ValueError, codigo_error: str):
+    if isinstance(error, NoEncontrado):
+        code = 404
+    elif isinstance(error, Conflicto):
+        code = 409
+    else:
+        code = 400
+
+    return response_error(mensaje=str(error), error=codigo_error, code=code)
+
+
+# =========================================================
+# EDITAR ESPECIALISTA
+# =========================================================
+
+@router.patch("/especialistas/{id_usuario}")
+def editar_especialista(
+    id_usuario: str,
+    datos: UsuarioPerfilUpdate,
+    db: Session = Depends(get_db)
+):
+    try:
+        especialista = actualizar_perfil(
+            db, id_usuario, datos.model_dump(exclude_unset=True), "especialista"
+        )
+
+        return response_success(
+            mensaje="Especialista actualizado exitosamente",
+            data=UsuarioOut.model_validate(especialista).model_dump(),
+            code=200
+        )
+
+    except ValueError as error:
+        db.rollback()
+        return _error_negocio(error, "ESPECIALISTA_UPDATE_FAILED")
+
+    except Exception as error:
+        db.rollback()
+        return response_error(
+            mensaje="Error al actualizar el especialista",
+            error=str(error),
+            code=500
+        )
+
+
+# =========================================================
+# DESACTIVAR ESPECIALISTA (borrado lógico)
+# =========================================================
+
+@router.delete("/especialistas/{id_usuario}")
+def desactivar_especialista_ruta(id_usuario: str, db: Session = Depends(get_db)):
+    try:
+        especialista = desactivar_especialista(db, id_usuario)
+
+        return response_success(
+            mensaje="Especialista desactivado exitosamente",
+            data=UsuarioOut.model_validate(especialista).model_dump(),
+            code=200
+        )
+
+    except ValueError as error:
+        db.rollback()
+        return _error_negocio(error, "ESPECIALISTA_DEACTIVATE_FAILED")
+
+    except Exception as error:
+        db.rollback()
+        return response_error(
+            mensaje="Error al desactivar el especialista",
+            error=str(error),
+            code=500
+        )
+
+
+# =========================================================
+# EDITAR PERFIL DEL CLIENTE
+# =========================================================
+
+@router.patch("/clientes/{id_usuario}/perfil")
+def editar_perfil_cliente(
+    id_usuario: str,
+    datos: UsuarioPerfilUpdate,
+    db: Session = Depends(get_db)
+):
+    try:
+        cliente = actualizar_perfil(
+            db, id_usuario, datos.model_dump(exclude_unset=True), "cliente"
+        )
+
+        return response_success(
+            mensaje="Perfil actualizado exitosamente",
+            data=UsuarioOut.model_validate(cliente).model_dump(),
+            code=200
+        )
+
+    except ValueError as error:
+        db.rollback()
+        return _error_negocio(error, "PERFIL_UPDATE_FAILED")
+
+    except Exception as error:
+        db.rollback()
+        return response_error(
+            mensaje="Error al actualizar el perfil",
             error=str(error),
             code=500
         )

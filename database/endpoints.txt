@@ -33,6 +33,9 @@ LISTAR ADMINISTRADORES
 @router.get("/administradores")
 http://localhost:8000/api/v1/usuarios/administradores
 
+EDITAR ESPECIALISTA
+EDITAR DATOS CLIENTE
+ELIMINAR ESPECIALISTA(INACTIVAR)
 
 --------------------
 TABLA DISPONIBILIDAD
@@ -79,6 +82,7 @@ BORRAR SERVICIO
 @router.delete("/{id_servicio}")
 http://localhost:8000/api/v1/servicios/{id_servicio}
 
+EDITAR SERVICIO 
 
 ----------------------
 TABLA SERVICIO_DISPONIBILIDAD

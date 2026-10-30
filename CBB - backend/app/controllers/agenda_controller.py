@@ -160,6 +160,9 @@ def crear_agenda(db: Session, datos: AgendaCreate):
         if disponibilidad.estado_disponibilidad != "disponible":
             raise ValueError("El horario seleccionado ya no está disponible")
 
+        if not disponibilidad.especialista.activo:
+            raise ValueError("El especialista seleccionado ya no está disponible")
+
         # =========================================================
         # 3. CREAR AGENDA CON EL PRECIO CALCULADO AUTOMÁTICAMENTE
         # =========================================================
