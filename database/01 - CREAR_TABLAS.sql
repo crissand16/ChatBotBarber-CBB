@@ -134,7 +134,11 @@ CREATE TABLE agenda (
         CHECK (
             estado_agenda IN (
                 'pendiente',
-                'completada'
+                'aceptada',
+                'confirmada', 
+                'cancelada', 
+                'completada',
+                'rechazada'
             )
         ),
 

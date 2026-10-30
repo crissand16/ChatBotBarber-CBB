@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from datetime import date
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.agenda import Agenda
@@ -252,6 +252,7 @@ def obtener_agendas_por_cliente(db: Session, id_cliente: str):
 # =========================================================
 
 def obtener_agendas_por_fecha(db: Session, fecha: str):
+    fecha_obj = date.fromisoformat(fecha)
     agendas = (
         db.query(Agenda)
         .join(Detalle, Detalle.id_agenda == Agenda.id_agenda)
@@ -264,7 +265,7 @@ def obtener_agendas_por_fecha(db: Session, fecha: str):
             Disponibilidad,
             Disponibilidad.id_disponibilidad == ServicioDisponibilidad.id_disponibilidad
         )
-        .filter(Disponibilidad.fecha_disponibilidad == fecha)
+        .filter(Disponibilidad.fecha_disponibilidad == fecha_obj)
         .options(*_EAGER_AGENDA)
         .order_by(Disponibilidad.hora_inicio_disponibilidad.asc())
         .distinct()

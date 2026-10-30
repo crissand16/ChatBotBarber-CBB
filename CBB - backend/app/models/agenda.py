@@ -64,7 +64,7 @@ class Agenda(Base):
         back_populates="agendas_cliente",
         foreign_keys=[id_cliente]
     )
-
+ 
     detalles = relationship(
         "Detalle",
         back_populates="agenda",

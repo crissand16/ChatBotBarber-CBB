@@ -4,7 +4,7 @@ from app.config.database import get_db
 
 
 from app.schema.usuario_schema import (
-    LoginRequest, UsuarioCreate, UsuarioOut
+    LoginRequest, UsuarioCreate, UsuarioOut 
 )
 from app.controllers.usuario_controller import (
     obtener_clientes,
