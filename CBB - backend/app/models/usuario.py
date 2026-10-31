@@ -54,13 +54,13 @@ class Usuario(Base):
     )
 
     
-    # Desactivación lógica: un usuario inactivo no puede iniciar sesión
-    # ni recibir nuevas citas, pero conserva su historial.
-    activo = Column(
-        Boolean,
-        nullable=False,
-        server_default=true()
-    )
+    # # Desactivación lógica: un usuario inactivo no puede iniciar sesión
+    # # ni recibir nuevas citas, pero conserva su historial.
+    # activo = Column(
+    #     Boolean,
+    #     nullable=False,
+    #     server_default=true()
+    # )
 
     __table_args__ = (
         CheckConstraint(

@@ -270,7 +270,7 @@ def _error_negocio(error: ValueError, codigo_error: str):
 # EDITAR ESPECIALISTA
 # =========================================================
 
-@router.patch("/especialistas/{id_usuario}")
+@router.put("/especialistas/{id_usuario}")
 def editar_especialista(
     id_usuario: str,
     datos: UsuarioPerfilUpdate,
@@ -332,7 +332,7 @@ def desactivar_especialista_ruta(id_usuario: str, db: Session = Depends(get_db))
 # EDITAR PERFIL DEL CLIENTE
 # =========================================================
 
-@router.patch("/clientes/{id_usuario}/perfil")
+@router.put("/clientes/{id_usuario}/perfil")
 def editar_perfil_cliente(
     id_usuario: str,
     datos: UsuarioPerfilUpdate,

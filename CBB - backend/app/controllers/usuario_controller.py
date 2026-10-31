@@ -1,3 +1,4 @@
+from datetime import date
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -170,7 +171,9 @@ campos_perfil = (
     "fecha_nacimiento_usuario",
 )
 
-def actualizar_perfil(db: Session, usuario: Usuario, datos: dict) -> Usuario:
+def actualizar_perfil(db: Session, id_usuario: Usuario, datos: dict, rol:str ) -> Usuario:
+    usuario = _obtener_con_rol(db, id_usuario, rol)
+
     cambios = {c: datos[c] for c in campos_perfil if datos.get(c) is not None}
     if not cambios:
         raise ValueError("No se enviaron campos para actualizar")
@@ -196,8 +199,8 @@ def actualizar_perfil(db: Session, usuario: Usuario, datos: dict) -> Usuario:
 def desactivar_especialista(db: Session, id_usuario: str) -> Usuario:
     especialista = _obtener_con_rol(db, id_usuario, "especialista")
 
-    if not especialista.activo:
-        raise Conflicto("El especialista ya está desactivado")
+    # if not especialista.activo:
+    #     raise Conflicto("El especialista ya está desactivado")
 
     citas_futuras = (
         db.query(func.count(func.distinct(Agenda.id_agenda)))
@@ -226,7 +229,7 @@ def desactivar_especialista(db: Session, id_usuario: str) -> Usuario:
             "Cancélalas antes de desactivarlo"
         )
 
-    especialista.activo = False
+   
     db.commit()
     db.refresh(especialista)
     return especialista

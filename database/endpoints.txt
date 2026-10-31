@@ -34,8 +34,11 @@ LISTAR ADMINISTRADORES
 http://localhost:8000/api/v1/usuarios/administradores
 
 EDITAR ESPECIALISTA
+@router.patch("/especialistas/{id_usuario}")
 EDITAR DATOS CLIENTE
+@router.patch("/clientes/{id_usuario}/perfil")
 ELIMINAR ESPECIALISTA(INACTIVAR)
+@router.delete("/especialistas/{id_usuario}")
 
 --------------------
 TABLA DISPONIBILIDAD
