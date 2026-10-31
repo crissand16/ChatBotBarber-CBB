@@ -67,6 +67,12 @@ function Sidebar({ abierto, onCerrar }: SidebarProps) {
             </NavLink>
           )}
 
+          {usuario?.rol === 'admin' && (
+            <NavLink to="/reportes">
+              📊 <span>Reportes</span>
+            </NavLink>
+          )}
+
           <NavLink to="/perfil">
             👤 <span>Perfil</span>
           </NavLink>

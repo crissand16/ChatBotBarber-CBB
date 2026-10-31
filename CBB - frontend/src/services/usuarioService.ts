@@ -4,6 +4,7 @@ import type {
   Usuario,
   UsuarioRegistro,
   UsuarioLogin,
+  UsuarioPerfilUpdate,
 } from '../interfaces/UsuarioInter';
 
 export const obtenerUsuarios = async (): Promise<Usuario[]> => {
@@ -48,5 +49,37 @@ export const loginUsuario = async (
     correo_usuario,
     contrasena_usuario,
   });
+  return data.data;
+};
+
+export const editarEspecialista = async (
+  idUsuario: string,
+  datos: UsuarioPerfilUpdate
+): Promise<Usuario> => {
+  const { data } = await api.patch<ApiResponse<Usuario>>(
+    `/usuarios/especialistas/${idUsuario}`,
+    datos
+  );
+  return data.data;
+};
+
+// Borrado lógico: el especialista queda inactivo, no se elimina.
+export const desactivarEspecialista = async (
+  idUsuario: string
+): Promise<Usuario> => {
+  const { data } = await api.delete<ApiResponse<Usuario>>(
+    `/usuarios/especialistas/${idUsuario}`
+  );
+  return data.data;
+};
+
+export const editarPerfilCliente = async (
+  idUsuario: string,
+  datos: UsuarioPerfilUpdate
+): Promise<Usuario> => {
+  const { data } = await api.put<ApiResponse<Usuario>>(
+    `/usuarios/clientes/${idUsuario}/perfil`,
+    datos
+  );
   return data.data;
 };

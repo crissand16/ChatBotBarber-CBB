@@ -1,6 +1,6 @@
 import api from './api';
 import type { ApiResponse } from '../interfaces/ApiResponse';
-import type { Servicio, ServicioCreate } from '../interfaces/ServicioInter';
+import type { Servicio, ServicioCreate, ServicioUpdate } from '../interfaces/ServicioInter';
 
 export const obtenerServicios = async (): Promise<Servicio[]> => {
   const { data } = await api.get<ApiResponse<Servicio[]>>('/servicios');
@@ -16,5 +16,13 @@ export const crearServicio = async (
   datos: ServicioCreate
 ): Promise<Servicio> => {
   const { data } = await api.post<ApiResponse<Servicio>>('/servicios', datos);
+  return data.data;
+};
+
+export const actualizarServicio = async (
+  id: number,
+  datos: ServicioUpdate
+): Promise<Servicio> => {
+  const { data } = await api.put<ApiResponse<Servicio>>(`/servicios/${id}`, datos);
   return data.data;
 };
