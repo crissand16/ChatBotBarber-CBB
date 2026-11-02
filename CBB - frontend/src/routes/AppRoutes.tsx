@@ -11,6 +11,7 @@ import Servicios from '../pages/Servicios';
 import Perfil from '../pages/Perfil';
 import Contacto from '../pages/Contacto';
 import Equipo from '../pages/Equipo';
+import Reportes from '../pages/Reportes'
 
 import RutaProtegida from './RutaProtegida';
 
@@ -74,6 +75,15 @@ function AppRoutes() {
           element={
             <RutaProtegida>
               <Equipo />
+            </RutaProtegida>
+          }
+        />
+
+        <Route
+          path="/reportes"
+          element={
+            <RutaProtegida roles={['admin']}>
+              <Reportes />
             </RutaProtegida>
           }
         />

@@ -56,7 +56,7 @@ export const editarEspecialista = async (
   idUsuario: string,
   datos: UsuarioPerfilUpdate
 ): Promise<Usuario> => {
-  const { data } = await api.patch<ApiResponse<Usuario>>(
+  const { data } = await api.put<ApiResponse<Usuario>>(
     `/usuarios/especialistas/${idUsuario}`,
     datos
   );

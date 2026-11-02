@@ -10,7 +10,7 @@ import Button from '../components/Button';
 
 import type {PerfilFormState,} from '../interfaces/PerfilFormInter';
 
-import {obtenerUsuarioPorId,editarPerfilCliente,editarEspecialista,} from '../services/usuarioService';
+import {obtenerUsuarioPorId,editarPerfilCliente} from '../services/usuarioService';
 
 import { obtenerMensajeError } from '../services/apiError';
 import { validarPerfil } from '../services/validaciones';
@@ -19,7 +19,7 @@ import {
   FORMULARIO_PERFIL_VACIO,
   aFormularioPerfil,
   aPayloadPerfil,
-} from '../interfaces/perfilForm';
+} from '../services/perfilForm';
 
 
 import '../App.css';
@@ -34,8 +34,9 @@ function Perfil() {
   const { usuario, iniciarSesion } = useAuth();
 
   const idUsuario = usuario?.id_usuario;
-  // El backend solo expone edición de perfil para clientes y especialistas.
-  const puedeEditarPerfil = usuario?.rol === 'cliente' || usuario?.rol === 'especialista';
+  // Solo el cliente edita su propio perfil. Los datos de los especialistas los
+  // modifica únicamente el administrador, desde la pantalla Equipo.
+  const puedeEditarPerfil = usuario?.rol === 'cliente' ;
 
   const [formulario, setFormulario] = useState<PerfilFormState>(FORMULARIO_PERFIL_VACIO);
   const [cargandoPerfil, setCargandoPerfil] = useState<boolean>(false);
@@ -83,11 +84,10 @@ function Perfil() {
 
     setGuardandoPerfil(true);
     try {
-      const payload = aPayloadPerfil(formulario);
-      const actualizado =
-        usuario.rol === 'cliente'
-          ? await editarPerfilCliente(usuario.id_usuario, payload)
-          : await editarEspecialista(usuario.id_usuario, payload);
+       const actualizado = await editarPerfilCliente(
+        usuario.id_usuario,
+        aPayloadPerfil(formulario)
+      );
 
       // Se actualiza la sesión para que el menú lateral muestre el nombre nuevo.
       iniciarSesion({

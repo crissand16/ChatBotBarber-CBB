@@ -8,7 +8,7 @@ import Button from '../components/Button';
 
 import type { Servicio } from '../interfaces/ServicioInter';
 import type { ServicioFormState } from '../interfaces/ServicioFormInter';
-import { obtenerServicios, crearServicio } from '../services/servicioService';
+import { obtenerServicios, crearServicio, actualizarServicio } from '../services/servicioService';
 import { obtenerMensajeError } from '../services/apiError';
 import { useAuth } from '../context/AuthContext';
 
@@ -23,8 +23,7 @@ const FORMULARIO_VACIO: ServicioFormState = {
 
 function Servicios() {
   const { usuario } = useAuth();
-  const puedeGestionar = usuario?.rol === 'admin' || usuario?.rol === 'especialista';
-
+  const puedeGestionar = usuario?.rol === 'admin' ;
   const [servicios, setServicios] = useState<Servicio[]>([]);
   const [cargando, setCargando] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
@@ -33,7 +32,9 @@ function Servicios() {
   const [formulario, setFormulario] = useState<ServicioFormState>(FORMULARIO_VACIO);
   const [errorFormulario, setErrorFormulario] = useState<string>('');
   const [guardando, setGuardando] = useState<boolean>(false);
-
+// null = se está creando un servicio nuevo; un id = se está editando ese servicio.
+  const [idEditando, setIdEditando] = useState<number | null>(null);
+ 
   const cargarServicios = async () => {
     setCargando(true);
     try {
@@ -50,6 +51,33 @@ function Servicios() {
   useEffect(() => {
     cargarServicios();
   }, []);
+
+    const abrirFormularioNuevo = () => {
+    setIdEditando(null);
+    setFormulario(FORMULARIO_VACIO);
+    setErrorFormulario('');
+    setMostrarFormulario(true);
+  };
+
+  const iniciarEdicion = (servicio: Servicio) => {
+    setIdEditando(servicio.id_servicios);
+    setFormulario({
+      nombre_servicio: servicio.nombre_servicio,
+      precio_servicio: String(servicio.precio_servicio),
+      duracion_minutos_servicio: String(servicio.duracion_minutos_servicio),
+      descripcion_servicio: servicio.descripcion_servicio ?? '',
+    });
+    setErrorFormulario('');
+    setMostrarFormulario(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cerrarFormulario = () => {
+    setIdEditando(null);
+    setFormulario(FORMULARIO_VACIO);
+    setErrorFormulario('');
+    setMostrarFormulario(false);
+  };
 
   const manejarCambio = (campo: keyof ServicioFormState, valor: string) => {
     setFormulario({ ...formulario, [campo]: valor });
@@ -74,20 +102,30 @@ function Servicios() {
       setErrorFormulario('Ingresa una duración válida en minutos.');
       return;
     }
+    const datos = {
+      nombre_servicio: formulario.nombre_servicio.trim(),
+      precio_servicio: precio,
+      duracion_minutos_servicio: duracion,
+      descripcion_servicio: formulario.descripcion_servicio.trim(),
+    };
+    const editando = idEditando !== null;
 
     setGuardando(true);
     try {
-      await crearServicio({
-        nombre_servicio: formulario.nombre_servicio.trim(),
-        precio_servicio: precio,
-        duracion_minutos_servicio: duracion,
-        descripcion_servicio: formulario.descripcion_servicio.trim(),
-      });
-      setFormulario(FORMULARIO_VACIO);
-      setMostrarFormulario(false);
+      if (editando) {
+        await actualizarServicio(idEditando, datos);
+      } else {
+        await crearServicio(datos);
+      }
+      cerrarFormulario();
       await cargarServicios();
     } catch (err) {
-      setErrorFormulario(obtenerMensajeError(err, 'No se pudo crear el servicio.'));
+      setErrorFormulario(
+        obtenerMensajeError(
+          err,
+          editando ? 'No se pudo actualizar el servicio.' : 'No se pudo crear el servicio.'
+        )
+      );
     } finally {
       setGuardando(false);
     }
@@ -161,7 +199,11 @@ function Servicios() {
           {errorFormulario && <p className="form-error">{errorFormulario}</p>}
 
           <Button type="submit" variant="success" disabled={guardando}>
-            {guardando ? 'Guardando...' : 'Guardar servicio'}
+            {guardando 
+              ? 'Guardando...' 
+              : idEditando !== null 
+              ? 'Guardar cambios' 
+              : 'Guardar servicio'}
           </Button>
         </form>
       )}
@@ -190,6 +232,14 @@ function Servicios() {
                 <span>${servicio.precio_servicio.toLocaleString('es-CO')}</span>
                 <span>{servicio.duracion_minutos_servicio} min</span>
               </div>
+
+              {puedeGestionar && (
+                <div className="servicio-card-acciones">
+                  <Button variant="outline" onClick={() => iniciarEdicion(servicio)}>
+                    Editar
+                  </Button>
+                </div>
+              )}
             </article>
           ))}
         </div>
