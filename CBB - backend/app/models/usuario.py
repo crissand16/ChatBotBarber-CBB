@@ -52,6 +52,7 @@ class Usuario(Base):
         TIMESTAMP,
         nullable=False
     )
+    
 
     __table_args__ = (
         CheckConstraint(
