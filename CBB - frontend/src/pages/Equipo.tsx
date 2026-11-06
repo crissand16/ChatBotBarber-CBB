@@ -25,7 +25,7 @@ import {
   FORMULARIO_PERFIL_VACIO,
   aFormularioPerfil,
   aPayloadPerfil,
-} from '../interfaces/perfilForm';
+} from '../services/perfilForm';
 
 import '../App.css';
 
@@ -68,6 +68,8 @@ function Equipo() {
         datos = await obtenerUsuarios();
       } else if (filtro === 'cliente') {
         datos = await obtenerClientes();
+      } else if (filtro === 'especialista') {
+        datos = await obtenerEspecialistas();
       } else {
         datos = await obtenerAdministradores();
       }
@@ -152,36 +154,6 @@ function Equipo() {
     }
   };
 
-
-  useEffect(() => {
-    const cargarUsuarios = async () => {
-      setCargando(true);
-      setError('');
-
-      try {
-        let datos: Usuario[] = [];
-
-        if (filtro === 'todos') {
-          datos = await obtenerUsuarios();
-        } else if (filtro === 'cliente') {
-          datos = await obtenerClientes();
-        } else if (filtro === 'especialista') {
-          datos = await obtenerEspecialistas();
-        } else {
-          datos = await obtenerAdministradores();
-        }
-
-        setUsuarios(datos);
-      } catch (err) {
-        setUsuarios([]);
-        setError(obtenerMensajeError(err, 'No se pudo cargar la lista de personas.'));
-      } finally {
-        setCargando(false);
-      }
-    };
-
-    cargarUsuarios();
-  }, [filtro]);
 
   return (
     <Layout>
