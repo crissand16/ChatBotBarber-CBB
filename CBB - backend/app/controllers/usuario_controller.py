@@ -1,4 +1,4 @@
-from datime import date
+from datetime import date
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
