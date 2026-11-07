@@ -1,6 +1,6 @@
 # 🚀 CBB - Backend (ChatBot Barber)
 
-Este repositorio contiene el backend del proyecto **ChatBot Barber**, desarrollado con **FastAPI** y configurado para ejecutarse en contenedores **Docker**, optimizado para un flujo de trabajo ágil y de recarga en caliente en entorno de desarrollo.
+Esta rama contiene el backend del proyecto **ChatBot Barber**, desarrollado con **FastAPI** y configurado para ejecutarse en contenedores **Docker**, optimizado para un flujo de trabajo ágil y de recarga en caliente en entorno de desarrollo.
 
 ---
 
