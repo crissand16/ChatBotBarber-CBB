@@ -71,7 +71,7 @@ function Equipo() {
       } else if (filtro === 'especialista') {
         datos = await obtenerEspecialistas();
       } else {
-        datos = await obtenerAdministradores();
+        datos = await obtenerAdministradores(); 
       }
 
       setUsuarios(datos);
