@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -96,7 +96,8 @@ def registrar_usuario(db: Session, datos: dict):
         contrasena_usuario=contrasena_hash, #Se almacena el hash y no la contraseña plana
         fecha_nacimiento_usuario=datos["fecha_nacimiento_usuario"],
         telefono_usuario=datos["telefono_usuario"],
-        rol_usuario=datos.get("rol_usuario") or "cliente"
+        rol_usuario=datos.get("rol_usuario") or "cliente",
+        fecha_registro_usuario=datetime.now()
     )
 
     try:
