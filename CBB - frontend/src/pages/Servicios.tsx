@@ -6,6 +6,8 @@ import PageHeader from '../components/PageHeader';
 import StatusMessage from '../components/StatusMessage';
 import Button from '../components/Button';
 
+import { BiPlusCircle } from "react-icons/bi";
+
 import type { Servicio } from '../interfaces/ServicioInter';
 import type { ServicioFormState } from '../interfaces/ServicioFormInter';
 import { obtenerServicios, crearServicio, actualizarServicio } from '../services/servicioService';
@@ -141,7 +143,8 @@ function Servicios() {
         actions={
           puedeGestionar && (
             <Button variant="outline" onClick={() => setMostrarFormulario((v) => !v)}>
-              {mostrarFormulario ? 'Cancelar' : '+ Agregar servicio'}
+             <BiPlusCircle size={20} style={{ marginRight: '5px', verticalAlign: 'middle' }} />
+              {mostrarFormulario ? 'Cancelar' : 'Agregar servicio'}
             </Button>
           )
         }

@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import type {FormEvent} from 'react';
 
+import { BiPencil } from "react-icons/bi";
+import { BiSolidTrash } from "react-icons/bi";
+
 import Layout from '../components/Layout';
 import PageHeader from '../components/PageHeader';
 import StatusMessage from '../components/StatusMessage';
@@ -278,7 +281,7 @@ function Equipo() {
                     {usuario.nombres_usuario} {usuario.apellidos_usuario}
                   </td>
                   <td>{usuario.correo_usuario}</td>
-                  <td>{usuario.telefono_usuario ?? '—'}</td>
+                  <td>{usuario.telefono_usuario ?? '  '}</td>
                   <td>
                     <span className={'badge ' + (ROL_A_CLASE[usuario.rol_usuario] ?? '')}>
                       {usuario.rol_usuario}
@@ -287,7 +290,7 @@ function Equipo() {
                   <td>
                     {usuario.fecha_registro_usuario
                       ? new Date(usuario.fecha_registro_usuario).toLocaleDateString('es-CO')
-                      : '—'}
+                      : ' '}
                   </td>
                   <td>
                     {usuario.rol_usuario === 'especialista' ? (
@@ -296,21 +299,23 @@ function Equipo() {
                           variant="outline"
                           onClick={() => iniciarEdicion(usuario)}
                           disabled={procesandoId === usuario.id_usuario}
+                          title="Editar" //Muestra el texto al pasar el cursor
                         >
-                          Editar
+                          <BiPencil size={20}/>
                         </Button>
                         (
                           <Button
                             variant="danger"
                             onClick={() => manejarDesactivar(usuario)}
                             disabled={procesandoId === usuario.id_usuario}
+                            title="Desactivar"
                           >
-                            Desactivar
+                            <BiSolidTrash size={20}/>
                           </Button>
                         ) 
                       </div>
                     ) : (
-                      '—'
+                      '  '
                     )}
                   </td>
                 </tr>
