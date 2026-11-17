@@ -59,8 +59,4 @@ export const descargarReporte = async (
     await leerErrorDelBlob(error);
     throw error;
   }
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> frontend

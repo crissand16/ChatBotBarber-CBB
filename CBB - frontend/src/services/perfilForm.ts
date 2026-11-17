@@ -25,8 +25,5 @@ export const aPayloadPerfil = (formulario: PerfilFormState): UsuarioPerfilUpdate
   correo_usuario: formulario.correo_usuario.trim(),
   telefono_usuario: formulario.telefono_usuario.trim(),
   fecha_nacimiento_usuario: formulario.fecha_nacimiento_usuario,
-<<<<<<< HEAD
+
 });
-=======
-});
->>>>>>> frontend

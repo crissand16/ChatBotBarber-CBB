@@ -114,13 +114,6 @@ function Servicios() {
     };
     const editando = idEditando !== null;
 
-    const datos = {
-      nombre_servicio: formulario.nombre_servicio.trim(),
-      precio_servicio: precio,
-      duracion_minutos_servicio: duracion,
-      descripcion_servicio: formulario.descripcion_servicio.trim(),
-    };
-    const editando = idEditando !== null;
 
     setGuardando(true);
     try {

@@ -299,19 +299,21 @@ function Equipo() {
                           onClick={() => iniciarEdicion(usuario)}
                           disabled={procesandoId === usuario.id_usuario}
                           title="Editar" //Muestra el texto al pasar el cursor
+                         
                         >
                           <BiPencil size={20}/>
                         </Button>
-                        (
+                        
                           <Button
                             variant="danger"
                             onClick={() => manejarDesactivar(usuario)}
                             disabled={procesandoId === usuario.id_usuario}
                             title="Desactivar"
+                            
                           >
                             <BiSolidTrash size={20}/>
                           </Button>
-                        ) 
+                        
                       </div>
                     ) : (
                       '  '

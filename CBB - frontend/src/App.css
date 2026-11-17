@@ -1102,6 +1102,7 @@
   border-radius: var(--radius-md);
   overflow-x: auto;
   box-shadow: var(--shadow-card);
+  
 }
 
 .tabla-usuarios {
@@ -1229,4 +1230,27 @@
 .panel-form-acciones {
   display: flex;
   gap: 12px;
+
+}
+
+/* =========================
+    EQUIPO
+========================= */
+.acciones-fila {
+  display: flex;
+  flex-direction: row; /* Los alinea horizontalmente (de izquierda a derecha) */
+  align-items: center; /* Los centra verticalmente */
+  gap: 8px; /* Espacio de separación entre cada botón */
+}
+
+/* Cambiar el tamaño y forma de cada botón de ícono */
+.acciones-fila .btn, 
+.acciones-fila button {
+  width: 36px;  /* Ancho deseado del botón */
+  height: 36px; /* Alto deseado del botón */
+  padding: 0;   /* Remueve el relleno para que el ícono quede centrado */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px; /* Bordes ligeramente redondeados (opcional) */
 }

@@ -191,10 +191,8 @@ function Reportes() {
             variant="success"
             onClick={() => manejarDescarga('excel')}
             disabled={descargando !== null}
+            style={{ padding: '6px', width: '12px', height: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            {descargando === 'excel' ? 'Generando...' : 'Descargar Excel'}
-          </Button>
-
             <BiDownload size={20} style={{ marginRight: '5px', verticalAlign: 'middle' }} />
             {descargando === 'excel' ? 'Generando...' : ' Excel'}
           </Button>
@@ -204,12 +202,13 @@ function Reportes() {
             variant="outline"
             onClick={() => manejarDescarga('pdf')}
             disabled={descargando !== null}
+             style={{ padding: '6px', width: '12px', height: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
             <BiDownload size={20} style={{ marginRight: '5px', verticalAlign: 'middle' }} />
             {descargando === 'pdf' ? 'Generando...' : ' PDF '}
 
           </Button>
-     
+     </div>
       </div>
     </Layout>
   );
