@@ -6,6 +6,8 @@ import PageHeader from '../components/PageHeader';
 import StatusMessage from '../components/StatusMessage';
 import Button from '../components/Button';
 
+import { BiPlusCircle } from "react-icons/bi";
+
 import type { Servicio } from '../interfaces/ServicioInter';
 import type { ServicioFormState } from '../interfaces/ServicioFormInter';
 import { obtenerServicios, crearServicio, actualizarServicio } from '../services/servicioService';
@@ -23,7 +25,8 @@ const FORMULARIO_VACIO: ServicioFormState = {
 
 function Servicios() {
   const { usuario } = useAuth();
-  const puedeGestionar = usuario?.rol === 'admin' ;
+  const puedeGestionar = usuario?.rol === 'admin';
+
   const [servicios, setServicios] = useState<Servicio[]>([]);
   const [cargando, setCargando] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
@@ -32,9 +35,9 @@ function Servicios() {
   const [formulario, setFormulario] = useState<ServicioFormState>(FORMULARIO_VACIO);
   const [errorFormulario, setErrorFormulario] = useState<string>('');
   const [guardando, setGuardando] = useState<boolean>(false);
+
 // null = se está creando un servicio nuevo; un id = se está editando ese servicio.
   const [idEditando, setIdEditando] = useState<number | null>(null);
- 
   const cargarServicios = async () => {
     setCargando(true);
     try {
@@ -52,7 +55,8 @@ function Servicios() {
     cargarServicios();
   }, []);
 
-    const abrirFormularioNuevo = () => {
+
+   const abrirFormularioNuevo = () => {
     setIdEditando(null);
     setFormulario(FORMULARIO_VACIO);
     setErrorFormulario('');
@@ -110,6 +114,14 @@ function Servicios() {
     };
     const editando = idEditando !== null;
 
+    const datos = {
+      nombre_servicio: formulario.nombre_servicio.trim(),
+      precio_servicio: precio,
+      duracion_minutos_servicio: duracion,
+      descripcion_servicio: formulario.descripcion_servicio.trim(),
+    };
+    const editando = idEditando !== null;
+
     setGuardando(true);
     try {
       if (editando) {
@@ -120,11 +132,11 @@ function Servicios() {
       cerrarFormulario();
       await cargarServicios();
     } catch (err) {
-      setErrorFormulario(
-        obtenerMensajeError(
-          err,
-          editando ? 'No se pudo actualizar el servicio.' : 'No se pudo crear el servicio.'
-        )
+
+      setErrorFormulario(obtenerMensajeError(err, 
+        editando ? 'No se pudo actualizar el servicio.' : 
+        'No se pudo crear el servicio.')
+
       );
     } finally {
       setGuardando(false);
@@ -140,7 +152,8 @@ function Servicios() {
         actions={
           puedeGestionar && (
             <Button variant="outline" onClick={() => setMostrarFormulario((v) => !v)}>
-              {mostrarFormulario ? 'Cancelar' : '+ Agregar servicio'}
+             <BiPlusCircle size={20} style={{ marginRight: '5px', verticalAlign: 'middle' }} />
+              {mostrarFormulario ? 'Cancelar' : 'Agregar servicio'}
             </Button>
           )
         }

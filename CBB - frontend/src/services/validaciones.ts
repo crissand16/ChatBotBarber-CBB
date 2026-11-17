@@ -29,4 +29,8 @@ export const validarPerfil = (perfil: PerfilFormState): string => {
   if (!perfil.fecha_nacimiento_usuario) return 'Selecciona la fecha de nacimiento.';
 
   return '';
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> frontend

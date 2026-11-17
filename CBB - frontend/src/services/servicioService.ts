@@ -19,10 +19,12 @@ export const crearServicio = async (
   return data.data;
 };
 
+
 export const actualizarServicio = async (
   id: number,
   datos: ServicioUpdate
 ): Promise<Servicio> => {
   const { data } = await api.put<ApiResponse<Servicio>>(`/servicios/${id}`, datos);
   return data.data;
+
 };

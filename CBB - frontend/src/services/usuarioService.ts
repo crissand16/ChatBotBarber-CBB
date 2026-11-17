@@ -4,7 +4,11 @@ import type {
   Usuario,
   UsuarioRegistro,
   UsuarioLogin,
+<<<<<<< HEAD
   UsuarioPerfilUpdate,
+=======
+  UsuarioPerfilUpdate
+>>>>>>> frontend
 } from '../interfaces/UsuarioInter';
 
 export const obtenerUsuarios = async (): Promise<Usuario[]> => {
@@ -56,7 +60,11 @@ export const editarEspecialista = async (
   idUsuario: string,
   datos: UsuarioPerfilUpdate
 ): Promise<Usuario> => {
+<<<<<<< HEAD
   const { data } = await api.put<ApiResponse<Usuario>>(
+=======
+  const { data } = await api.patch<ApiResponse<Usuario>>(
+>>>>>>> frontend
     `/usuarios/especialistas/${idUsuario}`,
     datos
   );
@@ -82,4 +90,8 @@ export const editarPerfilCliente = async (
     datos
   );
   return data.data;
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> frontend

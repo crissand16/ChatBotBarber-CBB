@@ -6,4 +6,5 @@ export interface PerfilFormState {
   correo_usuario: string;
   telefono_usuario: string;
   fecha_nacimiento_usuario: string;
+
 }

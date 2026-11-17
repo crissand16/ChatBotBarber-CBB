@@ -5,6 +5,8 @@ import PageHeader from '../components/PageHeader';
 import StatusMessage from '../components/StatusMessage';
 import Button from '../components/Button';
 
+import { BiDownload } from "react-icons/bi";
+
 import type { Usuario } from '../interfaces/UsuarioInter';
 import { obtenerEspecialistas } from '../services/usuarioService';
 import { descargarReporte } from '../services/reporteService';
@@ -192,14 +194,22 @@ function Reportes() {
           >
             {descargando === 'excel' ? 'Generando...' : 'Descargar Excel'}
           </Button>
+
+            <BiDownload size={20} style={{ marginRight: '5px', verticalAlign: 'middle' }} />
+            {descargando === 'excel' ? 'Generando...' : ' Excel'}
+          </Button>
+          
+
           <Button
             variant="outline"
             onClick={() => manejarDescarga('pdf')}
             disabled={descargando !== null}
           >
-            {descargando === 'pdf' ? 'Generando...' : 'Descargar PDF'}
+            <BiDownload size={20} style={{ marginRight: '5px', verticalAlign: 'middle' }} />
+            {descargando === 'pdf' ? 'Generando...' : ' PDF '}
+
           </Button>
-        </div>
+     
       </div>
     </Layout>
   );

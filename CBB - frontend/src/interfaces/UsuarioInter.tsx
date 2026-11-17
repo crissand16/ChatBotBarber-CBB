@@ -32,7 +32,8 @@ export interface UsuarioLogin {
   rol: string;
 }
 
-// Body de PUT /usuarios/especialistas/{id} y PUT /usuarios/clientes/{id}/perfil
+
+// Body de PATCH /usuarios/especialistas/{id} y PATCH /usuarios/clientes/{id}/perfil
 // (app/schema/usuario_schema.py -> UsuarioPerfilUpdate). Todos los campos son opcionales.
 export interface UsuarioPerfilUpdate {
   nombres_usuario?: string;
@@ -40,4 +41,5 @@ export interface UsuarioPerfilUpdate {
   correo_usuario?: string;
   telefono_usuario?: string;
   fecha_nacimiento_usuario?: string;
+
 }

@@ -1221,3 +1221,12 @@
     align-items: flex-start;
   }
 }
+
+
+/* =========================
+   REPORTES
+========================= */
+.panel-form-acciones {
+  display: flex;
+  gap: 12px;
+}

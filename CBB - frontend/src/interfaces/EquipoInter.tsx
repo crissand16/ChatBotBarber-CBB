@@ -4,4 +4,5 @@ export type FiltroRolUsuario = 'todos' | 'cliente' | 'especialista' | 'admin';
 export interface MensajeAccion {
   tono: 'exito' | 'error';
   texto: string;
+
 }

@@ -11,7 +11,8 @@ import Servicios from '../pages/Servicios';
 import Perfil from '../pages/Perfil';
 import Contacto from '../pages/Contacto';
 import Equipo from '../pages/Equipo';
-import Reportes from '../pages/Reportes'
+
+import Reportes from '../pages/Reportes';
 
 import RutaProtegida from './RutaProtegida';
 

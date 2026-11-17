@@ -33,11 +33,11 @@ const ROL_ETIQUETA: Record<string, string> = {
 function Perfil() {
   const { usuario, iniciarSesion } = useAuth();
 
-  const idUsuario = usuario?.id_usuario;
+
+   const idUsuario = usuario?.id_usuario;
   // Solo el cliente edita su propio perfil. Los datos de los especialistas los
   // modifica únicamente el administrador, desde la pantalla Equipo.
   const puedeEditarPerfil = usuario?.rol === 'cliente' ;
-
   const [formulario, setFormulario] = useState<PerfilFormState>(FORMULARIO_PERFIL_VACIO);
   const [cargandoPerfil, setCargandoPerfil] = useState<boolean>(false);
   const [guardandoPerfil, setGuardandoPerfil] = useState<boolean>(false);
@@ -84,10 +84,11 @@ function Perfil() {
 
     setGuardandoPerfil(true);
     try {
-       const actualizado = await editarPerfilCliente(
-        usuario.id_usuario,
-        aPayloadPerfil(formulario)
-      );
+      const actualizado = await editarPerfilCliente(
+            usuario.id_usuario, 
+            aPayloadPerfil(formulario)
+          );
+
 
       // Se actualiza la sesión para que el menú lateral muestre el nombre nuevo.
       iniciarSesion({
@@ -144,7 +145,10 @@ function Perfil() {
         </div>
       )}
 
-      {usuario && (
+
+
+            {usuario && (
+
         <div className="perfil-secciones">
           {puedeEditarPerfil && (
             <form className="panel-form" onSubmit={manejarGuardarPerfil}>
