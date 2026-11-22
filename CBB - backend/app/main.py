@@ -71,10 +71,14 @@ from app.routes.factura_routes import (
     router as factura_routes
 )
 
+from app.routes.reporte_routes import (
+    router as reporte_routes
+)
+
 # 5. VERSIÓN API
 API_PREFIX = "/api/v1"
 
-# 6. ROUTES
+# 8. ROUTES
 app.include_router(
     disponibilidad_routes, 
     prefix=API_PREFIX
@@ -107,6 +111,11 @@ app.include_router(
 
 app.include_router(
     factura_routes,
+    prefix=API_PREFIX
+)
+
+app.include_router(
+    reporte_routes,
     prefix=API_PREFIX
 )
 
