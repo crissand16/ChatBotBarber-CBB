@@ -17,7 +17,8 @@ def migrar_passwords(db: Session):
     contrasena_actual = usuario.contrasena_usuario
 
     # 2. Verificar si la contraseña ya está hasheada
-    if contrasena_actual.startswith("$2b"):
+    # (bcrypt genera prefijos $2a$, $2b$ o $2y$, no solo $2b$)
+    if contrasena_actual.startswith(("$2a$", "$2b$", "$2y$")):
       omitidos += 1
       continue
 

@@ -78,7 +78,7 @@ function Sidebar({ abierto, onCerrar }: SidebarProps) {
           </NavLink>
 
           <NavLink to="/contacto">
-            📞 <span>Contacto</span>
+            📬 <span>Contacto/buzón</span>
           </NavLink>
 
         </nav>

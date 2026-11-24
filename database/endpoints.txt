@@ -173,3 +173,22 @@ http://localhost:8000/api/v1/facturas/{id_factura}
 CAMBIAR ESTADO FACTURA
 @router.patch("/{id_factura}/estado")
 http://localhost:8000/api/v1/facturas/{id_factura}/estado
+
+
+------------------
+TABLA PQR (BUZÓN)
+------------------
+
+RADICAR UNA PQR (peticion | queja | reclamo) -> se guarda y se envía por correo
+@router.post("")
+http://localhost:8000/api/v1/pqr
+
+Body de ejemplo:
+{
+  "id_usuario": "1018452301",
+  "nombre": "Carlos Alberto Gómez Ruiz",
+  "correo": "carlos.gomez@gmail.com",
+  "tipo": "queja",
+  "asunto": "Demora en la atención",
+  "mensaje": "Mi cita era a las 10:00 y me atendieron a las 10:40."
+}

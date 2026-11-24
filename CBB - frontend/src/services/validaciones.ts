@@ -1,4 +1,5 @@
 import type { PerfilFormState } from '../interfaces/PerfilFormInter';
+import type { ContactoFormState } from '../interfaces/ContactoFormInter';
 
 export const validarCorreo = (correo: string): boolean => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
@@ -27,6 +28,26 @@ export const validarPerfil = (perfil: PerfilFormState): string => {
     return 'El teléfono debe tener entre 7 y 10 dígitos.';
   }
   if (!perfil.fecha_nacimiento_usuario) return 'Selecciona la fecha de nacimiento.';
+
+  return '';
+};
+
+// Devuelve el primer error del formulario del buzón PQR, o '' si todo es válido.
+// Los límites coinciden con PqrCreate en el backend.
+export const validarPqr = (pqr: ContactoFormState): string => {
+  const nombre = pqr.nombre.trim();
+  const correo = pqr.correo.trim();
+  const asunto = pqr.asunto.trim();
+  const mensaje = pqr.mensaje.trim();
+
+  if (nombre.length < 3) return 'Ingresa tu nombre completo.';
+  if (nombre.length > 100) return 'El nombre no puede superar 100 caracteres.';
+  if (!validarCorreo(correo)) return 'Ingresa un correo electrónico válido.';
+  if (correo.length > 60) return 'El correo no puede superar 60 caracteres.';
+  if (asunto.length < 5) return 'Escribe un asunto de mínimo 5 caracteres.';
+  if (asunto.length > 120) return 'El asunto no puede superar 120 caracteres.';
+  if (mensaje.length < 10) return 'Cuéntanos un poco más: mínimo 10 caracteres.';
+  if (mensaje.length > 2000) return 'El mensaje no puede superar 2000 caracteres.';
 
   return '';
 };

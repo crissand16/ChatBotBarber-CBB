@@ -1,3 +1,4 @@
+import secrets
 from datetime import date, datetime
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -114,6 +115,34 @@ def registrar_usuario(db: Session, datos: dict):
 
 
 # =========================================================
+# VERIFICAR CONTRASEÑA (hash bcrypt o texto plano heredado)
+# =========================================================
+# BUG anterior: login_usuario llamaba directo a pwd_context.verify().
+# Los usuarios de prueba (database/09 - INSERTS_TODO_EN_UNO.sql) tienen la
+# contraseña en TEXTO PLANO, y passlib lanza UnknownHashError ("hash could
+# not be identified") cuando lo guardado no es un hash bcrypt. Eso hacía
+# fallar el login con un error 500 en vez de dejar entrar.
+#
+# Ahora: si lo guardado es un hash bcrypt se verifica normal; si es texto
+# plano (cuenta que aún no se migró) se compara y, si coincide, se
+# convierte a hash en ese mismo momento (migración automática).
+
+def verificar_contrasena(db: Session, usuario: Usuario, contrasena_plana: str) -> bool:
+    guardada = usuario.contrasena_usuario or ""
+
+    # identify() devuelve None (no lanza error) si no es un hash conocido
+    if pwd_context.identify(guardada) is not None:
+        return pwd_context.verify(contrasena_plana, guardada)
+
+    if secrets.compare_digest(guardada.encode("utf-8"), contrasena_plana.encode("utf-8")):
+        usuario.contrasena_usuario = pwd_context.hash(contrasena_plana)
+        db.commit()
+        return True
+
+    return False
+
+
+# =========================================================
 # LOGIN SIMPLE
 # =========================================================
 
@@ -128,7 +157,7 @@ def login_usuario(db: Session, correo_usuario: str, contrasena_usuario: str):
         return None
 
 
-    if not pwd_context.verify(contrasena_usuario, usuario.contrasena_usuario):
+    if not verificar_contrasena(db, usuario, contrasena_usuario):
         return None
 
     return {

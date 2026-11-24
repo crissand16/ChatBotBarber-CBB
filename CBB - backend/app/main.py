@@ -2,7 +2,7 @@ from sqlalchemy import text
 from app.config.database import Base, engine
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.models import Usuario, Agenda, Disponibilidad, Servicios, ServicioDisponibilidad, Detalle, Factura
+from app.models import Usuario, Agenda, Disponibilidad, Servicios, ServicioDisponibilidad, Detalle, Factura, Pqr
 
 from contextlib import asynccontextmanager
 from app.utils.scheduler import iniciar_scheduler
@@ -22,6 +22,13 @@ try:
     print("Conexión exitosa a la base de datos")
 except Exception as error:
     print(f"Error de conexión a la base de datos: {error}")
+
+# La tabla del buzón PQR se crea sola si todavía no existe (no toca las
+# demás tablas). También está en database/12 - CREAR_PQR.sql.
+try:
+    Pqr.__table__.create(bind=engine, checkfirst=True)
+except Exception as error:
+    print(f"No se pudo verificar/crear la tabla pqr: {error}")
 
 # 2. CREACIÓN DE LA APLICACIÓN (¡Aquí faltaba inicializar 'app'!)
 app = FastAPI(lifespan=lifespan)
@@ -75,6 +82,10 @@ from app.routes.reporte_routes import (
     router as reporte_routes
 )
 
+from app.routes.pqr_routes import (
+    router as pqr_routes
+)
+
 # 5. VERSIÓN API
 API_PREFIX = "/api/v1"
 
@@ -116,6 +127,11 @@ app.include_router(
 
 app.include_router(
     reporte_routes,
+    prefix=API_PREFIX
+)
+
+app.include_router(
+    pqr_routes,
     prefix=API_PREFIX
 )
 

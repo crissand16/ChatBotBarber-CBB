@@ -20,7 +20,7 @@ function Chat() {
         <p>
           Muy pronto podrás conversar aquí mismo para resolver dudas y agendar citas
           sin salir del chat. Mientras tanto, usa la sección de{' '}
-          <strong>Contacto</strong> si necesitas ayuda inmediata.
+          <strong>Contacto/buzón</strong> si necesitas ayuda inmediata.
         </p>
       </div>
     </Layout>
