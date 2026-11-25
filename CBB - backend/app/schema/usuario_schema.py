@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Optional
 from datetime import date, datetime
 
@@ -9,14 +9,20 @@ class LoginRequest(BaseModel):
     contrasena_usuario: str
 
 class UsuarioCreate(BaseModel):
-    id_usuario: str
-    nombres_usuario: str
-    apellidos_usuario: str
+    id_usuario: str = Field(..., min_length=1)
+    nombres_usuario: str = Field, field_validator
+    apellidos_usuario: str = Field, field_validator
     correo_usuario: EmailStr
-    contrasena_usuario: str
+    contrasena_usuario: str = Field, field_validator
     fecha_nacimiento_usuario: date 
-    telefono_usuario: str
+    telefono_usuario: str = Field, field_validator
     rol_usuario: Optional[str] = "cliente"
+
+    @field_validator('contrasena_usuario')
+    @classmethod
+    def truncar_password(cls, v: str) -> str:
+        # Trunca automáticamente la contraseña a 72 caracteres por límite de bcrypt
+        return v[:72]
 
 class UsuarioUpdate(BaseModel):
     nombres_usuario: Optional[str] = None
