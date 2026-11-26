@@ -1,5 +1,4 @@
-from sqlalchemy import Column, String, TIMESTAMP, Date, CheckConstraint, Boolean, true
-
+from sqlalchemy import Column, String, TIMESTAMP, Date, CheckConstraint
 from sqlalchemy.orm import relationship
 from app.config.database import Base
 
@@ -53,7 +52,6 @@ class Usuario(Base):
         nullable=False
     )
 
-    
     # # Desactivación lógica: un usuario inactivo no puede iniciar sesión
     # # ni recibir nuevas citas, pero conserva su historial.
     # activo = Column(

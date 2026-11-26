@@ -57,7 +57,9 @@ def generar_excel(reporte: dict) -> bytes:
     # Título
     ws.cell(row=1, column=1, value=reporte["titulo"]).font = Font(bold=True, size=14)
     ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=total_cols)
-    ws.cell(row=2, column=1, value=f"Generado el {_ahora()}").font = Font(italic=True, color="666666")
+    ws.cell(row=2, column=1, value=f"Generado el {_ahora()}").font = Font(
+        italic=True, color="666666"
+    )
 
     # Filtros aplicados
     fila = 3
@@ -101,7 +103,10 @@ def generar_excel(reporte: dict) -> bytes:
     # Anchos de columna según el contenido (con tope)
     for c in range(1, total_cols + 1):
         mayor = max(
-            (len(str(ws.cell(row=r, column=c).value or "")) for r in range(fila_encabezado, ultima_fila + 1)),
+            (
+                len(str(ws.cell(row=r, column=c).value or ""))
+                for r in range(fila_encabezado, ultima_fila + 1)
+            ),
             default=10,
         )
         ws.column_dimensions[get_column_letter(c)].width = min(max(mayor + 3, 12), 45)
@@ -126,7 +131,10 @@ def generar_pdf(reporte: dict) -> bytes:
 
     estilos = getSampleStyleSheet()
     estilo_celda = ParagraphStyle("celda", parent=estilos["BodyText"], fontSize=8, leading=10)
-    estilo_filtros = ParagraphStyle("filtros", parent=estilos["BodyText"], fontSize=9, textColor=colors.HexColor("#444444"))
+    estilo_filtros = ParagraphStyle(
+            "filtros", parent=estilos["BodyText"], fontSize=9,
+            textColor=colors.HexColor("#444444")
+    )
 
     buffer = BytesIO()
     doc = SimpleDocTemplate(
@@ -151,7 +159,10 @@ def generar_pdf(reporte: dict) -> bytes:
             celdas.append(Paragraph(texto, estilo_celda))
         datos.append(celdas)
     if not filas:
-        datos.append([Paragraph("Sin registros para los filtros indicados", estilo_celda)] + [""] * (len(columnas) - 1))
+        datos.append(
+            [Paragraph("Sin registros para los filtros indicados", estilo_celda)]
+            + [""] * (len(columnas) - 1)
+        )
 
     # Anchos relativos opcionales ("pesos_columnas"); si no vienen, se reparten por igual.
     pesos = reporte.get("pesos_columnas")

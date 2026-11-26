@@ -18,6 +18,7 @@ router = APIRouter(
     tags=["Servicio Disponibilidad"]
 )
 
+
 @router.post("")
 def registrar(datos: ServicioDisponibilidadCreate, db: Session = Depends(get_db)):
     try:
@@ -42,6 +43,7 @@ def registrar(datos: ServicioDisponibilidadCreate, db: Session = Depends(get_db)
             code=500
         )
 
+
 @router.get("")
 def listar_todos(db: Session = Depends(get_db)):
     try:
@@ -63,7 +65,8 @@ def listar_todos(db: Session = Depends(get_db)):
             mensaje="Error al obtener la lista de registros",
             error=str(error),
             code=500
-        ) 
+        )
+
 
 @router.get("/{servicio_disponibilidad}")
 def obtener_por_id(servicio_disponibilidad: int, db: Session = Depends(get_db)):

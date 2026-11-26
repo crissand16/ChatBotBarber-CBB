@@ -47,14 +47,21 @@ def _correo_para_administrador(pqr: Pqr) -> None:
       <h2 style="margin:0 0 4px;color:#3452e1">Nueva {escape(tipo.lower())} · {pqr.radicado}</h2>
       <p style="margin:0 0 16px;color:#6b7280;font-size:13px">Buzón de ChatBotBarber · {fecha}</p>
       <table style="border-collapse:collapse;width:100%;font-size:14px">
-        <tr><td style="padding:6px 0;color:#6b7280;width:140px">Tipo</td><td><b>{escape(tipo)}</b></td></tr>
-        <tr><td style="padding:6px 0;color:#6b7280">Usuario</td><td>{escape(pqr.nombre_pqr)} (doc. {escape(pqr.id_usuario)})</td></tr>
-        <tr><td style="padding:6px 0;color:#6b7280">Correo</td><td>{escape(pqr.correo_pqr)}</td></tr>
-        <tr><td style="padding:6px 0;color:#6b7280">Asunto</td><td>{escape(pqr.asunto_pqr)}</td></tr>
+        <tr><td style="padding:6px 0;color:#6b7280;width:140px">Tipo</td><td><b>{escape(tipo)}
+        </b></td></tr>
+        <tr><td style="padding:6px 0;color:#6b7280">Usuario</td><td>{escape(pqr.nombre_pqr)}
+        (doc. {escape(pqr.id_usuario)})
+        </td></tr>
+        <tr><td style="padding:6px 0;color:#6b7280">Correo</td><td>{escape(pqr.correo_pqr)}
+        </td></tr>
+        <tr><td style="padding:6px 0;color:#6b7280">Asunto</td><td>{escape(pqr.asunto_pqr)}
+        </td></tr>
       </table>
-      <div style="margin-top:16px;padding:14px;background:#f4f6f8;border-radius:8px;white-space:pre-wrap;font-size:14px">{escape(pqr.mensaje_pqr)}</div>
+      <div style="margin-top:16px;padding:14px;background:#f4f6f8;border-radius:8px;
+      white-space:pre-wrap;font-size:14px">{escape(pqr.mensaje_pqr)}</div>
       <p style="margin-top:16px;font-size:12px;color:#6b7280">
-        Pulsa <b>Responder</b> para contestar: la respuesta llegará directamente a {escape(pqr.correo_pqr)}.
+        Pulsa <b>Responder</b> para contestar: la respuesta llegará directamente
+        a {escape(pqr.correo_pqr)}.
       </p>
     </div>
     """

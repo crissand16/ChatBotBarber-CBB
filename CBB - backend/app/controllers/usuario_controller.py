@@ -3,8 +3,6 @@ from datetime import date, datetime
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from app.models.usuario import Usuario
-
 from passlib.context import CryptContext
 
 from app.models.agenda import Agenda
@@ -16,6 +14,7 @@ from app.utils.errores import Conflicto, NoEncontrado
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 # =========================================================
 # LISTAR USUARIOS CON ROL CLIENTE
@@ -94,7 +93,7 @@ def registrar_usuario(db: Session, datos: dict):
         nombres_usuario=datos["nombres_usuario"],
         apellidos_usuario=datos["apellidos_usuario"],
         correo_usuario=datos["correo_usuario"],
-        contrasena_usuario=contrasena_hash, #Se almacena el hash y no la contraseña plana
+        contrasena_usuario=contrasena_hash,  # Se almacena el hash y no la contraseña plana
         fecha_nacimiento_usuario=datos["fecha_nacimiento_usuario"],
         telefono_usuario=datos["telefono_usuario"],
         rol_usuario=datos.get("rol_usuario") or "cliente",
@@ -156,7 +155,6 @@ def login_usuario(db: Session, correo_usuario: str, contrasena_usuario: str):
     if not usuario:
         return None
 
-
     if not verificar_contrasena(db, usuario, contrasena_usuario):
         return None
 
@@ -192,7 +190,7 @@ def _obtener_con_rol(db: Session, id_usuario: str, rol: str) -> Usuario:
 # =========================================================
 # Solo se modifican los campos que llegan con valor. El rol, el id y la
 # contraseña no se pueden cambiar desde aquí.
- 
+
 campos_perfil = (
     "nombres_usuario",
     "apellidos_usuario",
@@ -201,7 +199,8 @@ campos_perfil = (
     "fecha_nacimiento_usuario",
 )
 
-def actualizar_perfil(db: Session, id_usuario: Usuario, datos: dict, rol:str ) -> Usuario:
+
+def actualizar_perfil(db: Session, id_usuario: str, datos: dict, rol: str) -> Usuario:
     usuario = _obtener_con_rol(db, id_usuario, rol)
 
     cambios = {c: datos[c] for c in campos_perfil if datos.get(c) is not None}
@@ -259,7 +258,6 @@ def desactivar_especialista(db: Session, id_usuario: str) -> Usuario:
             "Cancélalas antes de desactivarlo"
         )
 
-   
     db.commit()
     db.refresh(especialista)
     return especialista

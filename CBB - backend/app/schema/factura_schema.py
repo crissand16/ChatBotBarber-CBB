@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 # Field función de Pydantic para añadir restricciones a un atributo
-#... campo obligatorio -- ge mayor o igual que
+# ... campo obligatorio -- ge mayor o igual que
 
 
 class FacturaCreate(BaseModel):

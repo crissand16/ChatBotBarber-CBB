@@ -42,6 +42,7 @@ router = APIRouter(
 # LISTAR TODAS LAS AGENDAS
 # =========================================================
 
+
 @router.get("")
 def listar_agendas(db: Session = Depends(get_db)):
     try:
@@ -271,7 +272,7 @@ def agendas_por_fecha(
 @router.patch("/{id_agenda}/estado")
 def cambiar_estado_agenda(
     id_agenda: int,
-    payload: AgendaUpdateEstado, #datos reales que se envían entre el cliente y el servidor
+    payload: AgendaUpdateEstado,  # datos reales que se envían entre el cliente y el servidor
     db: Session = Depends(get_db)
 ):
     try:

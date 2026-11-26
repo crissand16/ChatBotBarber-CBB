@@ -20,12 +20,12 @@ from app.schema.agenda_schema import AgendaCreate
 _EAGER_AGENDA = (
     joinedload(Agenda.cliente),
     joinedload(Agenda.detalles)
-        .joinedload(Detalle.servicio_disponibilidad)
-        .joinedload(ServicioDisponibilidad.servicio),
+    .joinedload(Detalle.servicio_disponibilidad)
+    .joinedload(ServicioDisponibilidad.servicio),
     joinedload(Agenda.detalles)
-        .joinedload(Detalle.servicio_disponibilidad)
-        .joinedload(ServicioDisponibilidad.disponibilidad)
-        .joinedload(Disponibilidad.especialista),
+    .joinedload(Detalle.servicio_disponibilidad)
+    .joinedload(ServicioDisponibilidad.disponibilidad)
+    .joinedload(Disponibilidad.especialista),
 )
 
 
@@ -82,6 +82,7 @@ def _serializar_agenda(agenda: Agenda) -> dict:
         "servicios": servicios
     }
 
+
 # =========================================================
 # HELPER: LIBERAR LA DISPONIBILIDAD ASOCIADA A UNA AGENDA
 # =========================================================
@@ -94,7 +95,6 @@ def _liberar_disponibilidades(agenda: Agenda):
         sd = detalle.servicio_disponibilidad
         if sd and sd.disponibilidad:
             sd.disponibilidad.estado_disponibilidad = "disponible"
-
 
 
 # =========================================================
@@ -225,7 +225,7 @@ def obtener_citas_especialista(db: Session, id_especialista: str):
             Disponibilidad.hora_inicio_disponibilidad.desc()
         )
         .distinct()
-        .all() # valores únicos
+        .all()  # valores únicos
     )
 
     return [_serializar_agenda(a) for a in agendas]
@@ -290,7 +290,6 @@ def obtener_agendas(db: Session):
     return [_serializar_agenda(a) for a in agendas]
 
 
-
 # =========================================================
 # ACTUALIZAR SOLO EL ESTADO DE UNA AGENDA
 # =========================================================
@@ -318,7 +317,6 @@ def actualizar_estado_agenda(db: Session, id_agenda: int, nuevo_estado: str) -> 
     db.commit()
     db.refresh(agenda)
     return agenda
-
 
 
 # =========================================================

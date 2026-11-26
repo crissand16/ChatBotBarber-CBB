@@ -14,6 +14,7 @@ router = APIRouter(
     tags=["Detalle"]
 )
 
+
 @router.post("")
 def registrar(datos: DetalleCreate, db: Session = Depends(get_db)):
     try:
@@ -37,6 +38,7 @@ def registrar(datos: DetalleCreate, db: Session = Depends(get_db)):
             code=500
         )
 
+
 @router.get("")
 def listar_detalles(db: Session = Depends(get_db)):
     try:
@@ -52,7 +54,8 @@ def listar_detalles(db: Session = Depends(get_db)):
             mensaje="Error al obtener la lista de detalles",
             error=str(error),
             code=500
-        ) 
+        )
+
 
 @router.get("/{id_detalle}")
 def obtener_por_id(id_detalle: int, db: Session = Depends(get_db)):

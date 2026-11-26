@@ -81,8 +81,6 @@ def crear_disponibilidad(db: Session, datos: dict):
     if especialista.rol_usuario != "especialista":
         raise ValueError("El usuario indicado no tiene rol de especialista")
 
-   
-
     nueva = Disponibilidad(
         id_especialista=datos["id_especialista"],
         fecha_disponibilidad=datos["fecha_disponibilidad"],
@@ -126,12 +124,12 @@ def actualizar_disponibilidad(db: Session, id_disponibilidad: int, datos: dict):
     )
 
     for campo in campos_actualizables:
-        if datos.get(campo) is not None: #get  obtiene el valor de una clave  
+        if datos.get(campo) is not None:   # get  obtiene el valor de una clave
             setattr(disponibilidad, campo, datos[campo])
 
     try:
         db.commit()
-        db.refresh(disponibilidad) #Vuelve a leer el objeto desde la base
+        db.refresh(disponibilidad)  # Vuelve a leer el objeto desde la base
         return disponibilidad
     except IntegrityError:
         db.rollback()

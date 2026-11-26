@@ -13,6 +13,6 @@ class DetalleOut(BaseModel):
 
     class Config:
         from_attributes = True
-# Extrae los datos usando los atributos normales de una 
+# Extrae los datos usando los atributos normales de una
 # clase (objeto.atributo)
-# en lugar de llaves de diccionario  
+# en lugar de llaves de diccionario

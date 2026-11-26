@@ -2,12 +2,13 @@ from pydantic import BaseModel, Field
 from datetime import date
 from typing import Optional
 
+
 class AgendaCreate(BaseModel):
     id_cliente: str
-    id_servicio_disponibilidad: int 
+    id_servicio_disponibilidad: int
     estado_agenda: Optional[str] = 'pendiente'
-    fecha_registro_agenda: Optional[date] = None 
+    fecha_registro_agenda: Optional[date] = None
+
 
 class AgendaUpdateEstado(BaseModel):
     nuevo_estado: str = Field(..., example="cancelada", description="Estados permitidos: ")
-    

@@ -4,7 +4,7 @@ from app.config.database import get_db
 
 
 from app.schema.usuario_schema import (
-    LoginRequest, UsuarioCreate, UsuarioOut, UsuarioPerfilUpdate 
+    LoginRequest, UsuarioCreate, UsuarioOut, UsuarioPerfilUpdate
 )
 from app.controllers.usuario_controller import (
     obtener_clientes,
@@ -25,7 +25,7 @@ from app.utils.response import (
 )
 
 router = APIRouter(
-        prefix="/usuarios", 
+        prefix="/usuarios",
         tags=["Usuarios"]
 )
 

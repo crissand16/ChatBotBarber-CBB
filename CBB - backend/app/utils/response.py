@@ -8,8 +8,6 @@ from decimal import Decimal
 from fastapi.responses import JSONResponse
 
 
-
-
 # =========================================================
 # CONVERTIR DATOS A FORMATO JSON
 # =========================================================
@@ -134,4 +132,3 @@ def response_error(
         }
 
     )
-
