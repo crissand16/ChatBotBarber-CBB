@@ -100,7 +100,9 @@ def reporte_agendas(
             ("Estado", estado or "todos"),
             ("Especialista", id_especialista or "todos"),
         ],
-        "columnas": ["ID", "Fecha", "Hora", "Cliente", "Especialista", "Servicios", "Estado", "Total"],
+        "columnas": [
+            "ID", "Fecha", "Hora", "Cliente", "Especialista", "Servicios", "Estado", "Total"
+        ],
         "filas": filas,
         "columnas_moneda": [7],
         "pesos_columnas": [0.6, 1.2, 0.9, 2.2, 2.2, 3.4, 1.4, 1.4],
@@ -157,7 +159,10 @@ def reporte_facturas(
             ("Hasta", fecha_fin.isoformat()),
             ("Estado", estado or "todos"),
         ],
-        "columnas": ["N° factura", "Fecha", "Agenda", "Cliente", "Subtotal", "IVA", "Total", "Estado", "Método de pago"],
+        "columnas": [
+            "N° factura", "Fecha", "Agenda", "Cliente",
+            "Subtotal", "IVA", "Total", "Estado", "Método de pago"
+        ],
         "filas": filas,
         "columnas_moneda": [4, 5, 6],
         "pesos_columnas": [1, 1.8, 0.9, 2.6, 1.3, 1.2, 1.3, 1.2, 1.6],

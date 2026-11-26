@@ -1,9 +1,9 @@
 from sqlalchemy import (
-Column,
+    Column,
     Integer,
     String,
     ForeignKey,
-    Numeric, 
+    Numeric,
     TIMESTAMP,
     CheckConstraint
 )
@@ -16,7 +16,7 @@ class Agenda(Base):
 
     __tablename__ = "agenda"
 
-    id_agenda = Column( 
+    id_agenda = Column(
         Integer,
         primary_key=True
     )

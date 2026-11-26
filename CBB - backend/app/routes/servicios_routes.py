@@ -19,6 +19,8 @@ router = APIRouter(
 # =========================================================
 # LISTAR TODOS LOS SERVICIOS
 # =========================================================
+
+
 @router.get("")
 def obtener_todos(db: Session = Depends(get_db)):
     try:
@@ -47,6 +49,8 @@ def obtener_todos(db: Session = Depends(get_db)):
 # =========================================================
 # OBTENER SERVICIO POR ID
 # =========================================================
+
+
 @router.get("/{id_servicio}")
 def obtener_por_id(id_servicio: int, db: Session = Depends(get_db)):
     try:
@@ -73,6 +77,8 @@ def obtener_por_id(id_servicio: int, db: Session = Depends(get_db)):
 # =========================================================
 # CREAR UN NUEVO SERVICIO
 # =========================================================
+
+
 @router.post("")
 def registrar_servicio(datos: ServicioCreate, db: Session = Depends(get_db)):
     try:
@@ -94,6 +100,8 @@ def registrar_servicio(datos: ServicioCreate, db: Session = Depends(get_db)):
 # =========================================================
 # ACTUALIZAR UN SERVICIO (parcial)
 # =========================================================
+
+
 @router.put("/{id_servicio}")
 def editar_servicio(id_servicio: int, datos: ServicioUpdate, db: Session = Depends(get_db)):
     try:
@@ -122,6 +130,8 @@ def editar_servicio(id_servicio: int, datos: ServicioUpdate, db: Session = Depen
 # =========================================================
 # ELIMINAR UN SERVICIO
 # =========================================================
+
+
 @router.delete("/{id_servicio}")
 def borrar_servicio(id_servicio: int, db: Session = Depends(get_db)):
     try:

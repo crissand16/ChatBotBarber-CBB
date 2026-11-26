@@ -7,41 +7,42 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def migrar_passwords(db: Session):
-  # 1. Obtener todos los usuarios de la base de datos
-  usuarios = db.query(Usuario).all()
+    # 1. Obtener todos los usuarios de la base de datos
+    usuarios = db.query(Usuario).all()
 
-  actualizados = 0
-  omitidos = 0
+    actualizados = 0
+    omitidos = 0
 
-  for usuario in usuarios:
-    contrasena_actual = usuario.contrasena_usuario
+    for usuario in usuarios:
+        contrasena_actual = usuario.contrasena_usuario
 
-    # 2. Verificar si la contraseña ya está hasheada
-    if contrasena_actual.startswith("$2b"):
-      omitidos += 1
-      continue
+        # 2. Verificar si la contraseña ya está hasheada
+        # (bcrypt genera prefijos $2a$, $2b$ o $2y$, no solo $2b$)
+        if contrasena_actual.startswith(("$2a$", "$2b$", "$2y$")):
+            omitidos += 1
+            continue
 
-    # 3. Si está en texto plano, generar el hash
-    nuevo_hash = pwd_context.hash(contrasena_actual)
+        # 3. Si está en texto plano, generar el hash
+        nuevo_hash = pwd_context.hash(contrasena_actual)
 
-    # 4. Asignar el hash al usuario
-    usuario.contrasena_usuario = nuevo_hash
-    actualizados += 1
+        # 4. Asignar el hash al usuario
+        usuario.contrasena_usuario = nuevo_hash
+        actualizados += 1
 
-  # 5. Guardar los cambios en la BD de forma masiva
-  try:
-    db.commit()
-    print("---- Migración finalizada ----")
-    print(f"Contraseñas actualizadas a hash: {actualizados}")
-    print(f"Contraseñas que ya estaban hasheadas: {omitidos}")
-  except Exception as e:
-    db.rollback()
-    print(f"Ocurrió un error y se hizo rollback: {e}")
+    # 5. Guardar los cambios en la BD de forma masiva
+    try:
+        db.commit()
+        print("---- Migración finalizada ----")
+        print(f"Contraseñas actualizadas a hash: {actualizados}")
+        print(f"Contraseñas que ya estaban hasheadas: {omitidos}")
+    except Exception as e:
+        db.rollback()
+        print(f"Ocurrió un error y se hizo rollback: {e}")
 
 
 if __name__ == "__main__":
-  db = SessionLocal()  # Aquí se abre la BD
-  try:
-    migrar_passwords(db)
-  finally:
-    db.close()  # Cierra la sesión al terminar
+    db = SessionLocal()  # Aquí se abre la BD
+    try:
+        migrar_passwords(db)
+    finally:
+        db.close()  # Cierra la sesión al terminar

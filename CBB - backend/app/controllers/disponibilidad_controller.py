@@ -124,12 +124,12 @@ def actualizar_disponibilidad(db: Session, id_disponibilidad: int, datos: dict):
     )
 
     for campo in campos_actualizables:
-        if datos.get(campo) is not None: #get  obtiene el valor de una clave  
+        if datos.get(campo) is not None:   # get  obtiene el valor de una clave
             setattr(disponibilidad, campo, datos[campo])
 
     try:
         db.commit()
-        db.refresh(disponibilidad) #Vuelve a leer el objeto desde la base
+        db.refresh(disponibilidad)  # Vuelve a leer el objeto desde la base
         return disponibilidad
     except IntegrityError:
         db.rollback()

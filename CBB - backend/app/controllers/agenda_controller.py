@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from datetime import date
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.agenda import Agenda
@@ -20,12 +20,12 @@ from app.schema.agenda_schema import AgendaCreate
 _EAGER_AGENDA = (
     joinedload(Agenda.cliente),
     joinedload(Agenda.detalles)
-        .joinedload(Detalle.servicio_disponibilidad)
-        .joinedload(ServicioDisponibilidad.servicio),
+    .joinedload(Detalle.servicio_disponibilidad)
+    .joinedload(ServicioDisponibilidad.servicio),
     joinedload(Agenda.detalles)
-        .joinedload(Detalle.servicio_disponibilidad)
-        .joinedload(ServicioDisponibilidad.disponibilidad)
-        .joinedload(Disponibilidad.especialista),
+    .joinedload(Detalle.servicio_disponibilidad)
+    .joinedload(ServicioDisponibilidad.disponibilidad)
+    .joinedload(Disponibilidad.especialista),
 )
 
 
@@ -82,6 +82,7 @@ def _serializar_agenda(agenda: Agenda) -> dict:
         "servicios": servicios
     }
 
+
 # =========================================================
 # HELPER: LIBERAR LA DISPONIBILIDAD ASOCIADA A UNA AGENDA
 # =========================================================
@@ -94,7 +95,6 @@ def _liberar_disponibilidades(agenda: Agenda):
         sd = detalle.servicio_disponibilidad
         if sd and sd.disponibilidad:
             sd.disponibilidad.estado_disponibilidad = "disponible"
-
 
 
 # =========================================================
@@ -159,7 +159,6 @@ def crear_agenda(db: Session, datos: AgendaCreate):
 
         if disponibilidad.estado_disponibilidad != "disponible":
             raise ValueError("El horario seleccionado ya no está disponible")
-
 
         # =========================================================
         # 3. CREAR AGENDA CON EL PRECIO CALCULADO AUTOMÁTICAMENTE
@@ -226,7 +225,7 @@ def obtener_citas_especialista(db: Session, id_especialista: str):
             Disponibilidad.hora_inicio_disponibilidad.desc()
         )
         .distinct()
-        .all() # valores únicos
+        .all()  # valores únicos
     )
 
     return [_serializar_agenda(a) for a in agendas]
@@ -253,6 +252,7 @@ def obtener_agendas_por_cliente(db: Session, id_cliente: str):
 # =========================================================
 
 def obtener_agendas_por_fecha(db: Session, fecha: str):
+    fecha_obj = date.fromisoformat(fecha)
     agendas = (
         db.query(Agenda)
         .join(Detalle, Detalle.id_agenda == Agenda.id_agenda)
@@ -265,7 +265,7 @@ def obtener_agendas_por_fecha(db: Session, fecha: str):
             Disponibilidad,
             Disponibilidad.id_disponibilidad == ServicioDisponibilidad.id_disponibilidad
         )
-        .filter(Disponibilidad.fecha_disponibilidad == fecha)
+        .filter(Disponibilidad.fecha_disponibilidad == fecha_obj)
         .options(*_EAGER_AGENDA)
         .order_by(Disponibilidad.hora_inicio_disponibilidad.asc())
         .distinct()
@@ -288,7 +288,6 @@ def obtener_agendas(db: Session):
     )
 
     return [_serializar_agenda(a) for a in agendas]
-
 
 
 # =========================================================
@@ -318,7 +317,6 @@ def actualizar_estado_agenda(db: Session, id_agenda: int, nuevo_estado: str) -> 
     db.commit()
     db.refresh(agenda)
     return agenda
-
 
 
 # =========================================================

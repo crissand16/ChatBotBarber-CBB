@@ -25,9 +25,13 @@ class Detalle(Base):
     )
 
     id_servicio_disponibilidad = Column(
-        Integer,
-        ForeignKey("servicio_disponibilidad.id_servicio_disponibilidad", onupdate="CASCADE", ondelete="CASCADE"),
-        nullable=False
+            Integer,
+            ForeignKey(
+                "servicio_disponibilidad.id_servicio_disponibilidad",
+                onupdate="CASCADE",
+                ondelete="CASCADE"
+            ),
+            nullable=False
     )
 
     __table_args__ = (

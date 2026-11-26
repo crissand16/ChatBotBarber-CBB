@@ -26,25 +26,25 @@ class Factura(Base):
     )
 
     subtotal_factura = Column(
-        Numeric(10, 2), 
+        Numeric(10, 2),
         nullable=False)
-    
+
     iva_factura = Column(
-        Numeric(10, 2), 
+        Numeric(10, 2),
         nullable=False)
-    
+
     total_factura = Column(
-        Numeric(10, 2), 
+        Numeric(10, 2),
         nullable=False)
 
     estado_factura = Column(
-        String(20), 
-        nullable=False, 
+        String(20),
+        nullable=False,
         server_default="pendiente")
-    
+
     metodo_pago_factura = Column(
-        String(20), 
-        nullable=False, 
+        String(20),
+        nullable=False,
         server_default="efectivo")
 
     id_agenda = Column(
@@ -55,11 +55,11 @@ class Factura(Base):
     )
 
     __table_args__ = (
-        CheckConstraint("subtotal_factura >= 0", 
+        CheckConstraint("subtotal_factura >= 0",
                         name="chk_factura_subtotal"),
-        CheckConstraint("iva_factura >= 0", 
+        CheckConstraint("iva_factura >= 0",
                         name="chk_factura_iva"),
-        CheckConstraint("total_factura >= 0", 
+        CheckConstraint("total_factura >= 0",
                         name="chk_factura_total"),
         CheckConstraint(
             "estado_factura IN ('pendiente', 'pagada')",

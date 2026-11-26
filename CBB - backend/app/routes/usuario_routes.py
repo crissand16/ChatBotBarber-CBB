@@ -18,13 +18,14 @@ from app.controllers.usuario_controller import (
     desactivar_especialista
 )
 
+from app.utils.errores import Conflicto, NoEncontrado
 from app.utils.response import (
     response_success,
     response_error
 )
 
 router = APIRouter(
-        prefix="/usuarios", 
+        prefix="/usuarios",
         tags=["Usuarios"]
 )
 
@@ -250,8 +251,6 @@ def login(datos: LoginRequest, db: Session = Depends(get_db)):
         )
 
 
-
-
 # =========================================================
 # TRADUCTOR DE ERRORES DE NEGOCIO A HTTP
 # =========================================================
@@ -358,6 +357,6 @@ def editar_perfil_cliente(
         db.rollback()
         return response_error(
             mensaje="Error al actualizar el perfil",
-            error = str(error),
+            error=str(error),
             code=500
         )

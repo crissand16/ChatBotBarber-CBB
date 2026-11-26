@@ -9,8 +9,8 @@ class Servicios(Base):
     __tablename__ = "servicios"
 
     id_servicios = Column(
-        Integer, 
-        primary_key=True, 
+        Integer,
+        primary_key=True,
         autoincrement=True)
 
     nombre_servicio = Column(
@@ -21,16 +21,16 @@ class Servicios(Base):
         nullable=False)
     duracion_minutos_servicio = Column(
         Integer,
-        nullable=False, 
+        nullable=False,
         server_default="30")
     descripcion_servicio = Column(
         String(200),
         nullable=True)
 
     __table_args__ = (
-        CheckConstraint("precio_servicio >= 0", 
+        CheckConstraint("precio_servicio >= 0",
                         name="chk_servicios_precio"),
-        CheckConstraint("duracion_minutos_servicio > 0", 
+        CheckConstraint("duracion_minutos_servicio > 0",
                         name="chk_servicios_duracion"),
     )
 

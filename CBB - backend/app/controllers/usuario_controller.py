@@ -1,4 +1,5 @@
-from datetime import date
+import secrets
+from datetime import date, datetime
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -92,10 +93,11 @@ def registrar_usuario(db: Session, datos: dict):
         nombres_usuario=datos["nombres_usuario"],
         apellidos_usuario=datos["apellidos_usuario"],
         correo_usuario=datos["correo_usuario"],
-        contrasena_usuario=contrasena_hash, #Se almacena el hash y no la contraseña plana
+        contrasena_usuario=contrasena_hash,  # Se almacena el hash y no la contraseña plana
         fecha_nacimiento_usuario=datos["fecha_nacimiento_usuario"],
         telefono_usuario=datos["telefono_usuario"],
-        rol_usuario=datos.get("rol_usuario") or "cliente"
+        rol_usuario=datos.get("rol_usuario") or "cliente",
+        fecha_registro_usuario=datetime.now()
     )
 
     try:
@@ -112,6 +114,34 @@ def registrar_usuario(db: Session, datos: dict):
 
 
 # =========================================================
+# VERIFICAR CONTRASEÑA (hash bcrypt o texto plano heredado)
+# =========================================================
+# BUG anterior: login_usuario llamaba directo a pwd_context.verify().
+# Los usuarios de prueba (database/09 - INSERTS_TODO_EN_UNO.sql) tienen la
+# contraseña en TEXTO PLANO, y passlib lanza UnknownHashError ("hash could
+# not be identified") cuando lo guardado no es un hash bcrypt. Eso hacía
+# fallar el login con un error 500 en vez de dejar entrar.
+#
+# Ahora: si lo guardado es un hash bcrypt se verifica normal; si es texto
+# plano (cuenta que aún no se migró) se compara y, si coincide, se
+# convierte a hash en ese mismo momento (migración automática).
+
+def verificar_contrasena(db: Session, usuario: Usuario, contrasena_plana: str) -> bool:
+    guardada = usuario.contrasena_usuario or ""
+
+    # identify() devuelve None (no lanza error) si no es un hash conocido
+    if pwd_context.identify(guardada) is not None:
+        return pwd_context.verify(contrasena_plana, guardada)
+
+    if secrets.compare_digest(guardada.encode("utf-8"), contrasena_plana.encode("utf-8")):
+        usuario.contrasena_usuario = pwd_context.hash(contrasena_plana)
+        db.commit()
+        return True
+
+    return False
+
+
+# =========================================================
 # LOGIN SIMPLE
 # =========================================================
 
@@ -125,7 +155,7 @@ def login_usuario(db: Session, correo_usuario: str, contrasena_usuario: str):
     if not usuario:
         return None
 
-    if not pwd_context.verify(contrasena_usuario, usuario.contrasena_usuario):
+    if not verificar_contrasena(db, usuario, contrasena_usuario):
         return None
 
     return {
@@ -160,7 +190,7 @@ def _obtener_con_rol(db: Session, id_usuario: str, rol: str) -> Usuario:
 # =========================================================
 # Solo se modifican los campos que llegan con valor. El rol, el id y la
 # contraseña no se pueden cambiar desde aquí.
- 
+
 campos_perfil = (
     "nombres_usuario",
     "apellidos_usuario",
@@ -170,9 +200,9 @@ campos_perfil = (
 )
 
 
-def actualizar_perfil(db: Session, id_usuario: Usuario, datos: dict, rol:str) -> Usuario:
+def actualizar_perfil(db: Session, id_usuario: str, datos: dict, rol: str) -> Usuario:
     usuario = _obtener_con_rol(db, id_usuario, rol)
-    
+
     cambios = {c: datos[c] for c in campos_perfil if datos.get(c) is not None}
     if not cambios:
         raise ValueError("No se enviaron campos para actualizar")
